@@ -1,8 +1,14 @@
-## A Statistical Distribution Library
+# A Statistical Distribution Library
 
-# Currently has the following:
+## Currently has the following:
 
-- Basic Normal
-- Expanded Binomial
+### Basic Normal
 
-  - Needs CDF?
+- Needs PMF
+- Needs CDF?
+- Needs PDF?
+
+### Expanded Binomial
+
+- Needs CDF?
+- Needs PDF?

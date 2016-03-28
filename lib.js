@@ -28,6 +28,117 @@ babelHelpers.createClass = function () {
 
 babelHelpers;
 
+function factorial(n) {
+  if (n < 0) return -1;else if (n == 0) return 1;else return n * factorial(n - 1);
+};
+
+function sterling(n) {
+  var n2 = n * n;
+  return (13860 - (462 - (132 - (90 - 140 / n2) / n2) / n2) / n2) / n / 166320;
+};
+
+// http://blog.plover.com/math/choose.html
+
+function choose(n, k) {
+  if (k > n) throw new Error('k cannot be greater than n.');
+  var r = 1;
+  for (var d = 1; d <= k; d++) {
+    r *= n--;
+    r /= d;
+  }
+  return r;
+};
+
+// https://github.com/substack/gamma.js/blob/master/index.js
+
+var GAMMA_NUM = 7;
+var GAMMA_TABLE = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+var GAMMA_NUM_LN = 607 / 128;
+var GAMMA_TABLE_LN = [0.99999999999999709182, 57.156235665862923517, -59.597960355475491248, 14.136097974741747174, -0.49191381609762019978, 0.33994649984811888699e-4, 0.46523628927048575665e-4, -0.98374475304879564677e-4, 0.15808870322491248884e-3, -0.21026444172410488319e-3, 0.21743961811521264320e-3, -0.16431810653676389022e-3, 0.84418223983852743293e-4, -0.26190838401581408670e-4, 0.36899182659531622704e-5];
+
+function gamma(input) {
+  var z = input;
+  if (z < 0.5) {
+    return Math.PI / (Math.sin(Math.PI * z) * gamma(1 - z));
+  } else if (z > 100) {
+    Math.exp(lngamma(z));
+  } else {
+    z -= 1;
+    var x = GAMMA_TABLE[0];
+    for (var i = 1; i < GAMMA_NUM + 2; i++) {
+      x += GAMMA_TABLE[i] / (z + i);
+    };
+    var t = z + GAMMA_NUM + .5;
+    return Math.sqrt(2 * Math.PI) * Math.pow(t, z + .5) * Math.exp(-t) * x;
+  };
+};
+
+function lngamma(z) {
+  if (z < 0) return Number('0/0');
+  var x = GAMMA_TABLE_LN[0];
+  for (var i = GAMMA_TABLE_LN.length - 1; i > 0; --i) {
+    x += GAMMA_TABLE_LN[i] / (z + i);
+  }var t = z + GAMMA_NUM_LN + .5;
+  return .5 * Math.log(2 * Math.PI) + (z + .5) * Math.log(t) - t + Math.log(x) - Math.log(z);
+}
+
+var Utils = Object.freeze({
+  factorial: factorial,
+  sterling: sterling,
+  choose: choose,
+  gamma: gamma,
+  lngamma: lngamma
+});
+
+var GammaDistribution = function () {
+  babelHelpers.createClass(GammaDistribution, null, [{
+    key: 'random',
+    value: function random(a, b) {
+      return console.log('this is wrong');
+    }
+  }, {
+    key: 'pmf',
+    value: function pmf(x, a, b) {
+      if (x < 0) {
+        return 0;
+      } else if (x == 0) {
+        if (a == 1) return 1 / b;else return 0;
+      } else if (a == 1) {
+        return Math.exp(-x / b) / b;
+      } else {
+        return Math.exp((a - 1) * Math.log(x / b) - x / b - lngamma(a)) / b;
+      };
+    }
+  }]);
+
+  function GammaDistribution(a, b) {
+    var _this = this;
+
+    babelHelpers.classCallCheck(this, GammaDistribution);
+
+    this.pdf = function (x) {
+      return _this.constructor.pdf(x, _this.a, _this.b);
+    };
+
+    this.random = function () {
+      return _this.constructor.random(_this.a, _this.b);
+    };
+
+    this.sample = function (n) {
+      return Array.apply(null, Array(n)).map(function () {
+        return _this.random();
+      });
+    };
+
+    this.a = a;
+    this.b = b;
+    this.mu = a / b;
+    this.variance = a / (b * b);
+  }
+
+  return GammaDistribution;
+}();
+
 var last = NaN;
 
 var NormalDistribution = function () {
@@ -45,12 +156,22 @@ var NormalDistribution = function () {
       }
       return mu + z * sigma;
     }
+  }, {
+    key: 'pdf',
+    value: function pdf(x, mu, sigma) {
+      var u = x / Math.abs(sigma);
+      return 1 / (Math.sqrt(2 * Math.PI) * Math.abs(sigma)) * Math.exp(-1 * Math.pow(x - mu, 2) / (2 * sigma * sigma));
+    }
   }]);
 
   function NormalDistribution(mu, sigma) {
     var _this = this;
 
     babelHelpers.classCallCheck(this, NormalDistribution);
+
+    this.pdf = function (x) {
+      return _this.constructor.pdf(x, _this.mu, _this.sigma);
+    };
 
     this.random = function () {
       return _this.constructor.random(_this.mu, _this.sigma);
@@ -71,48 +192,52 @@ var NormalDistribution = function () {
   return NormalDistribution;
 }();
 
-function factorial(n) {
-  if (n < 0) return -1;else if (n == 0) return 1;else return n * factorial(n - 1);
-};
+var CauchyDistribution = function () {
+  babelHelpers.createClass(CauchyDistribution, null, [{
+    key: "random",
+    value: function random(a) {
+      var u = Math.random();
+      while (u == 0.5) {
+        u = Math.random();
+      }return a * Math.tan(Math.PI * u);
+    }
+  }, {
+    key: "pmf",
+    value: function pmf(x, a) {
+      var u = x / a;
+      return 1 / (Math.PI * a) / (1 + u * u);
+    }
+  }]);
 
-function sterling(n) {
-  var n2 = n * n;
-  return (13860 - (462 - (132 - (90 - 140 / n2) / n2) / n2) / n2) / n / 166320;
-};
+  function CauchyDistribution(a) {
+    var _this = this;
 
-var BINOM_TABLE = [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1], [1, 4, 6, 4, 1]];
+    babelHelpers.classCallCheck(this, CauchyDistribution);
 
-// https://pomax.github.io/bezierinfo/
-
-function choose(n, k) {
-  function addBinomial() {
-    var s = BINOM_TABLE.length;
-    var nextRow = [];
-    nextRow[0] = 1;
-    var prev = s - 1;
-    for (var i = 1; i <= prev; i++) {
-      nextRow[i] = BINOM_TABLE[prev][i - 1] + BINOM_TABLE[prev][i];
+    this.pdf = function (x) {
+      return _this.constructor.pdf(x, _this.a);
     };
-    nextRow[s] = 1;
-    BINOM_TABLE.push(nextRow);
-  };
-  while (n >= BINOM_TABLE.length) {
-    addBinomial();
-  };
-  return BINOM_TABLE[n][k];
-};
 
-var Utils = Object.freeze({
-  factorial: factorial,
-  sterling: sterling,
-  BINOM_TABLE: BINOM_TABLE,
-  choose: choose
-});
+    this.random = function () {
+      return _this.constructor.random(_this.a);
+    };
+
+    this.sample = function (n) {
+      return Array.apply(null, Array(n)).map(function () {
+        return _this.random();
+      });
+    };
+
+    this.a = a;
+  }
+
+  return CauchyDistribution;
+}();
 
 var _class;
 var _temp;
 var _initialiseProps;
-var SMALL_MEAN = 14;
+var SMALL_MEAN$1 = 14;
 
 var BinomialDistribution = (_temp = _class = function () {
   babelHelpers.createClass(BinomialDistribution, null, [{
@@ -132,7 +257,7 @@ var BinomialDistribution = (_temp = _class = function () {
       var q = 1 - p;
       var s = p / q;
       var np = n * p;
-      if (np < SMALL_MEAN) {
+      if (np < SMALL_MEAN$1) {
         var f = Math.pow(q, n);
         var u = Math.random();
         while (ix <= n && u >= f) {
@@ -221,7 +346,13 @@ var BinomialDistribution = (_temp = _class = function () {
         } else if (p == 1) {
           P = k == n ? 1 : 0;
         } else {
-          P = choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+          var Cnk = choose(n, k);
+          var pows = Math.pow(p, k) * Math.pow(1 - p, n - k);
+          if (Cnk == 'Infinity') {
+            if (pows == 0) return 0;else return Cnk;
+          } else {
+            return Cnk * pows;
+          }
         }
         return P;
       };
@@ -260,6 +391,51 @@ var BinomialDistribution = (_temp = _class = function () {
   };
 }, _temp);
 
+var BernoulliDistribution = function () {
+  babelHelpers.createClass(BernoulliDistribution, null, [{
+    key: "random",
+    value: function random(p) {
+      var u = Math.random();
+      if (u < p) return 1;else return 0;
+    }
+  }, {
+    key: "pmf",
+    value: function pmf(k, p) {
+      if (k == 0) return 1 - p;else if (k == 1) return p;else return 0;
+    }
+  }]);
+
+  function BernoulliDistribution(p) {
+    var _this = this;
+
+    babelHelpers.classCallCheck(this, BernoulliDistribution);
+
+    this.pdf = function (k) {
+      return _this.constructor.pdf(k, _this.p);
+    };
+
+    this.random = function () {
+      return _this.constructor.random(_this.p);
+    };
+
+    this.sample = function (n) {
+      return Array.apply(null, Array(n)).map(function () {
+        return _this.random();
+      });
+    };
+
+    if (p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
+    this.p = p;
+    this.mu = p;
+    this.variance = p * (1 - p);
+  }
+
+  return BernoulliDistribution;
+}();
+
 exports.Normal = NormalDistribution;
 exports.Binomial = BinomialDistribution;
+exports.Bernoulli = BernoulliDistribution;
+exports.Cauchy = CauchyDistribution;
+exports.Gamma = GammaDistribution;
 exports.Utils = Utils;

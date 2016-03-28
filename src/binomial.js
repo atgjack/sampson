@@ -94,14 +94,22 @@ export default class BinomialDistribution {
     return Math.floor(flipped ? (n - ix) : ix);
   };
 
-  static pmf(k: number, p: number, n: number): number {
+  static pdf(k: number, p: number, n: number): number {
+    if ( < 0) throw new Error("k must be positive or zero.")
     if (k > n) return 0
     else {
       let P: number;
       if (p == 0) { P = (k == 0) ? 1 : 0 }
       else if (p == 1) { P = (k == n) ? 1 : 0 }
       else {
-        P = choose(n, k) * Math.pow(p, k) * Math.pow((1-p), (n-k));
+        let Cnk = choose(n, k);
+        let pows = Math.pow(p, k) * Math.pow((1-p), (n-k));
+        if (Cnk == 'Infinity') {
+          if (pows == 0) return 0
+          else return Cnk;
+        } else {
+          return Cnk * pows;
+        }
       }
       return P;
     };

@@ -15,6 +15,11 @@ export default class NormalDistribution {
     return mu + z * sigma;
   };
 
+  static pdf(x: number, mu: number, sigma: number): number {
+    let u = x / Math.abs(sigma);
+    return ( 1 / ( Math.sqrt(2 * Math.PI) * Math.abs(sigma) ) ) * Math.exp( -1 * Math.pow(x - mu, 2) / ( 2 * sigma * sigma) );
+  };
+
   constructor(mu: number, sigma: number): void {
     if (!mu || !sigma) throw new Error('Need mu and sigma for the normal distribution.');
     this.mu = mu;
@@ -22,6 +27,7 @@ export default class NormalDistribution {
     this.variance = sigma * sigma;
   };
 
+  pdf    = (x: number): number => this.constructor.pdf(x, this.mu, this.sigma);
   random = (): number => this.constructor.random(this.mu, this.sigma);
   sample = (n: number): array => Array.apply(null, Array(n)).map( () => this.random() );
 }
