@@ -95,7 +95,7 @@ export default class BinomialDistribution {
   };
 
   static pdf(k: number, p: number, n: number): number {
-    if ( < 0) throw new Error("k must be positive or zero.")
+    if (k < 0) throw new Error("k must be positive or zero.")
     if (k > n) return 0
     else {
       let P: number;

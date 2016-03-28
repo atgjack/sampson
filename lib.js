@@ -33,8 +33,7 @@ function factorial(n) {
 };
 
 function sterling(n) {
-  var n2 = n * n;
-  return (13860 - (462 - (132 - (90 - 140 / n2) / n2) / n2) / n2) / n / 166320;
+  return (n + .5) * Math.log(n) - n + Math.log(2 * Math.PI) / 2;
 };
 
 // http://blog.plover.com/math/choose.html
@@ -339,6 +338,7 @@ var BinomialDistribution = (_temp = _class = function () {
   }, {
     key: "pdf",
     value: function pdf(k, p, n) {
+      if (k < 0) throw new Error("k must be positive or zero.");
       if (k > n) return 0;else {
         var P = void 0;
         if (p == 0) {

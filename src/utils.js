@@ -6,8 +6,7 @@ export function factorial(n: number): number {
 };
 
 export function sterling(n: number): number {
-  let n2 = n * n;
-  return (13860 - (462 - (132 - (90 - 140 / n2) / n2) / n2) / n2) / n / 166320;
+  return (n + .5) * Math.log(n) - n + Math.log(2 * Math.PI) / 2;
 };
 
 // http://blog.plover.com/math/choose.html
