@@ -1,6 +1,6 @@
 # A Statistical Distribution Library
 
-## Currently has the following:
+### **Currently has the following:**
 
 ### Distributions
 
