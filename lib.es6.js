@@ -1,5 +1,3 @@
-'use strict';
-
 var babelHelpers = {};
 
 babelHelpers.classCallCheck = function (instance, Constructor) {
@@ -589,6 +587,4 @@ var Statistics = Object.freeze({
 	TTest: tTest
 });
 
-exports.Distributions = Distributions;
-exports.Statistics = Statistics;
-exports.Utils = Utils$1;
+export { Distributions, Statistics, Utils$1 as Utils };
