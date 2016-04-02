@@ -577,7 +577,7 @@
     return Sample;
   }();
 
-  function tTest(sample, x, other) {
+  function tTest(sample, other, x) {
     if (!sample) return NaN;
     if (!other) return (sample.mean - x) / (sample.std / Math.sqrt(sample.size));else {
       var difference = x || 0;
