@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import std from './std';
+import { std } from '../utils';
 
 let round = (x) => Math.round(x * 1000) / 1000;
 

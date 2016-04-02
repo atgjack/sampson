@@ -1,4 +1,9 @@
 var babelHelpers = {};
+babelHelpers.typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+};
 
 babelHelpers.classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -46,6 +51,16 @@ babelHelpers.possibleConstructorReturn = function (self, call) {
   }
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+babelHelpers.toConsumableArray = function (arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+    return arr2;
+  } else {
+    return Array.from(arr);
+  }
 };
 
 babelHelpers;
@@ -114,11 +129,158 @@ function mean(x) {
   return x.length == 0 ? NaN : sum(x) / x.length;
 };
 
-function sumNthPowerDev(x, n) {
-  var mu = mean(x);
-  return x.reduce(function (p, next) {
-    return p + Math.pow(next - mu, n);
-  }, 0);
+function mode(list) {
+  if (list.length == 0) return NaN;else if (list.length == 1) return list;else {
+    var _ret = function () {
+      var histo = list.reduce(function (obj, val) {
+        if (obj[val]) obj[val]++;else obj[val] = 1;
+        return obj;
+      }, {});
+      var histoKeys = Object.keys(histo);
+      var most = histoKeys.map(function (i) {
+        return histo[i];
+      }).reduce(function (p, n) {
+        return n > p ? n : p;
+      });
+      return {
+        v: histoKeys.filter(function (i) {
+          return histo[i] == most;
+        }).map(function (i) {
+          return Number(i);
+        })
+      };
+    }();
+
+    if ((typeof _ret === "undefined" ? "undefined" : babelHelpers.typeof(_ret)) === "object") return _ret.v;
+  };
+};
+
+var LIST_LIMIT = 600;
+var LIST_SCALE = .5;
+
+function quickselect(array, k, begin, end) {
+  var list = array.slice(0);
+  if (list.length == 0 || k >= list.length) return NaN;
+  var left = begin || 0;
+  var right = end || list.length - 1;
+  if (left == right) return list[left];else {
+    while (right > left) {
+      if (right - left > LIST_LIMIT) {
+        var n = right - left + 1;
+        var m = k - left + 1;
+        var z = Math.log(n);
+        var s = LIST_SCALE * Math.exp(2 * z / 3);
+        var sd = LIST_SCALE * Math.sqrt(z * s * (n - s) / n);
+        var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+        var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+        quickselect(list, k, newLeft, newRight);
+      }
+      var t = list[k];
+      var i = left;
+      var j = right;
+      swap(list, i, k);
+      if (list[j] > t) swap(list, i, j);
+      while (i < j) {
+        swap(list, i, j);
+        i++;
+        j--;
+        while (list[i] < t) {
+          i++;
+        }while (list[j] > t) {
+          j--;
+        }
+      };
+      if (list[left] === t) swap(list, left, j);else {
+        j++;
+        swap(list, j, right);
+      };
+      if (j > k) {
+        right = j - 1;
+      } else {
+        left = j + 1;
+        right = j - 1;
+      };
+    };
+    return list[k];
+  };
+};
+
+function swap(list, i, j) {
+  var temp = list[i];
+  list[i] = list[j];
+  list[j] = temp;
+}
+
+function median(list) {
+  var result = void 0;
+  if (list.length == 0) result = NaN;else {
+    var even = list.length % 2 == 0;
+    if (even) {
+      result = quickselect(list, list.length / 2);
+      result += quickselect(list, list.length / 2 - 1);
+      result /= 2;
+    } else {
+      result = quickselect(list, (list.length - 1) / 2);
+    };
+  };
+  return result;
+}
+
+function percentile(list, p) {
+  if (p == undefined || p > 1 || p < 0) throw new Error('p must be between zero and 1 inclusive.');
+  if (!list) throw new Error('need a list to rank.');
+  var index = Math.floor(list.length * p);
+  if (index >= list.length) index = list.length - 1;
+  return quickselect(list, index);
+}
+
+function quantile(list) {
+  if (list == undefined || list.length == 0) throw new Error('you must provide an array.');
+
+  for (var _len = arguments.length, quantiles = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    quantiles[_key - 1] = arguments[_key];
+  }
+
+  var validQuants = quantiles.reduce(function (p, n) {
+    return n >= 0 && n <= 1 && p;
+  }, true);
+  if (!validQuants) throw new Error('quantiles must be between zero and one inclusive.');
+  if (quantiles.length > 1) return quantiles.map(function (q) {
+    return quantile(list, q);
+  });else {
+    var quant = quantiles[0];
+    if (quant == 0) return list[0];else if (quant == 1) return list[list.length - 1];else {
+      var index = list.length * quant;
+      if (index % 1) {
+        return quickselect(list, Math.floor(index));
+      } else if (list.length % 2) {
+        return quickselect(list, index);
+      } else {
+        return (quickselect(list, index - 1) + quickselect(list, index)) / 2;
+      };
+    };
+  };
+};
+
+function range(list) {
+  return Math.max.apply(Math, babelHelpers.toConsumableArray(list)) - Math.min.apply(Math, babelHelpers.toConsumableArray(list));
+}
+
+function sumNthPowerDev(x, n, absolute) {
+  if (x.length == 0) return NaN;else {
+    var _ret = function () {
+      var mu = mean(x);
+      return {
+        v: x.reduce(function (p, next) {
+          var diff = next - mu;
+          if (absolute) diff = Math.abs(diff);
+          return p + Math.pow(diff, n);
+        }, 0)
+      };
+    }();
+
+    if ((typeof _ret === 'undefined' ? 'undefined' : babelHelpers.typeof(_ret)) === "object") return _ret.v;
+  };
 };
 
 function variance(x) {
@@ -140,12 +302,18 @@ function zscore(x, mu, std) {
 
 
 
-var Utils = Object.freeze({
+var utils = Object.freeze({
 	choose: choose,
 	factorial: factorial,
 	gamma: gamma,
 	lngamma: lngamma,
+	median: median,
 	mean: mean,
+	mode: mode,
+	percentile: percentile,
+	quantile: quantile,
+	range: range,
+	select: quickselect,
 	std: std,
 	stirling: stirling,
 	sum: sum,
@@ -264,16 +432,17 @@ NormalDistribution.discrete = false;
 
 var CauchyDistribution = function () {
   babelHelpers.createClass(CauchyDistribution, null, [{
-    key: "random",
+    key: 'random',
     value: function random(a) {
-      var u = Math.random();
-      while (u == 0.5) {
+      if (a == undefined || a <= 0) throw new Error('a must be positive and greater than zero.');
+      var u = void 0;
+      while (!u || u == 0.5) {
         u = Math.random();
       }return a * Math.tan(Math.PI * u);
     }
   }, {
-    key: "pmf",
-    value: function pmf(x, a) {
+    key: 'pdf',
+    value: function pdf(x, a) {
       var u = x / a;
       return 1 / (Math.PI * a) / (1 + u * u);
     }
@@ -298,6 +467,7 @@ var CauchyDistribution = function () {
       });
     };
 
+    if (a == undefined || a <= 0) throw new Error('a must be positive and greater than zero.');
     this.a = a;
   }
 
@@ -311,10 +481,10 @@ var SMALL_MEAN$1 = 14;
 
 var BinomialDistribution = function () {
   babelHelpers.createClass(BinomialDistribution, null, [{
-    key: "random",
+    key: 'random',
     value: function random(prob, n) {
-      if (prob > 1 || prob < 0) throw new Error("p must be between 0 and 1.");
-      if (n < 0) throw new Error("n must be positive or zero.");
+      if (typeof prob != 'number' || prob > 1 || prob < 0) throw new Error("p must be between 0 and 1.");
+      if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");
       if (n == 0) return 0;
 
       var flipped = false;
@@ -378,25 +548,17 @@ var BinomialDistribution = function () {
               };
             } else if (u <= p3) {
               ix = Math.floor(xl + Math.log(v) / lambda_l);
-              if (ix < 0) {
-                tryAgain();
-              } else {
-                v *= (u - p2) * lambda_l;
-              };
+              v *= (u - p2) * lambda_l;
             } else {
               ix = Math.floor(xr - Math.log(v) / lambda_r);
-              if (ix > n) {
-                tryAgain();
-              } else {
-                v *= (u - p3) * lambda_r;
-              };
+              v *= (u - p3) * lambda_r;
             };
             varr = Math.log(v);
             var x1 = ix + 1;
             var w1 = n - ix - 1;
             var f1 = fm + 1;
             var z1 = n + 1 - fm;
-            accept = xm * Math.log(f1 / x1) + (n - fm + .5) * Math.log(z1 / w1) + (ix - fm) * Math.log(w1 * p / (x1 * q)) + sterling(f1) + sterling(z1) - sterling(x1) - sterling(w1);
+            accept = xm * Math.log(f1 / x1) + (n - fm + .5) * Math.log(z1 / w1) + (ix - fm) * Math.log(w1 * p / (x1 * q)) + stirling(f1) + stirling(z1) - stirling(x1) - stirling(w1);
             // skipped the faster options for now
             if (varr > accept) tryAgain();
           };
@@ -407,10 +569,9 @@ var BinomialDistribution = function () {
       return Math.floor(flipped ? n - ix : ix);
     }
   }, {
-    key: "pmf",
+    key: 'pmf',
     value: function pmf(k, p, n) {
-      if (k < 0) throw new Error("k must be positive or zero.");
-      if (k > n) return 0;else {
+      if (k < 0 || k > n) return 0;else {
         var P = void 0;
         if (p == 0) {
           P = k == 0 ? 1 : 0;
@@ -435,8 +596,8 @@ var BinomialDistribution = function () {
 
     _initialiseProps.call(this);
 
-    if (p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
-    if (n < 0) throw new Error("n must be positive or zero.");
+    if (p == undefined || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
+    if (n == undefined || n < 0) throw new Error("n must be positive or zero.");
     this.p = p;
     this.n = n;
     this.mu = n * p;
@@ -472,6 +633,7 @@ var BernoulliDistribution = function (_BinomialDistribution) {
   babelHelpers.createClass(BernoulliDistribution, null, [{
     key: 'random',
     value: function random(p) {
+      if (p == undefined || p < 0 || p > 1) throw new Error('p must be between zero and one inclusive.');
       var u = Math.random();
       if (u < p) return 1;else return 0;
     }
@@ -484,7 +646,24 @@ var BernoulliDistribution = function (_BinomialDistribution) {
 
   function BernoulliDistribution(p) {
     babelHelpers.classCallCheck(this, BernoulliDistribution);
-    return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(BernoulliDistribution).call(this, p, 1));
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(BernoulliDistribution).call(this, p, 1));
+
+    _this.pdf = function (k) {
+      return _this.constructor.pmf(k, _this.p);
+    };
+
+    _this.random = function () {
+      return _this.constructor.random(_this.p);
+    };
+
+    _this.sample = function (n) {
+      return Array.apply(null, Array(n)).map(function () {
+        return _this.random();
+      });
+    };
+
+    return _this;
   }
 
   return BernoulliDistribution;
@@ -494,7 +673,7 @@ BernoulliDistribution.covariates = 1;
 
 
 
-var Distributions = Object.freeze({
+var distributions = Object.freeze({
 	Normal: NormalDistribution,
 	Binomial: BinomialDistribution,
 	Bernoulli: BernoulliDistribution,
@@ -506,18 +685,52 @@ var Sample = function () {
   babelHelpers.createClass(Sample, null, [{
     key: 'variance',
     value: function variance(x) {
-      return x.length == 0 ? NaN : sumNthPowerDev(x, 2) / (x.length - 1);
+      return sumNthPowerDev(x, 2) / (x.length - 1);
     }
   }, {
-    key: 'std',
-    value: function std(x) {
+    key: 'sqrdMeanDev',
+    value: function sqrdMeanDev(x) {
+      return sumNthPowerDev(x, 2);
+    }
+  }, {
+    key: 'meanDev',
+    value: function meanDev(x) {
+      return sumNthPowerDev(x, 1, true) / x.length;
+    }
+  }, {
+    key: 'stdDev',
+    value: function stdDev(x) {
       var v = this.variance(x);
       return isNaN(v) ? 0 : Math.sqrt(v);
     }
   }, {
+    key: 'rootMeanSqrd',
+    value: function rootMeanSqrd(x) {
+      return Math.sqrt(x.map(function (val) {
+        return val * val;
+      }).reduce(function (p, n) {
+        return p + n;
+      }) / x.length);
+    }
+  }, {
+    key: 'stdMeanDev',
+    value: function stdMeanDev(x) {
+      return this.stdDev(x) / Math.sqrt(x.length);
+    }
+  }, {
+    key: 'relativeStdDev',
+    value: function relativeStdDev(x) {
+      return this.stdDev(x) / mean(x);
+    }
+  }, {
+    key: 'quartiles',
+    value: function quartiles(x) {
+      return quantile(x, .25, .5, .75);
+    }
+  }, {
     key: 'skewness',
     value: function skewness(x) {
-      var std = this.std(x);
+      var std = this.stdDev(x);
       if (isNaN(std) || x.length < 3) return NaN;else {
         var n = x.length;
         var cubed = Math.pow(std, 3);
@@ -526,15 +739,26 @@ var Sample = function () {
       }
     }
   }, {
+    key: 'kurtosis',
+    value: function kurtosis(x) {
+      var std = this.stdDev(x);
+      if (isNaN(std) || x.length < 3) return NaN;else {
+        var n = x.length;
+        var sumCubed = sumNthPowerDev(x, 2);
+        var sumQuarted = sumNthPowerDev(x, 4);
+        return sumQuarted / Math.pow(sumCubed, 2);
+      }
+    }
+  }, {
     key: 'covariance',
     value: function covariance(x, y) {
       if (!x || !y || x.size <= 1 || x.size !== y.size) return NaN;else {
-        var sum = x.data.map(function (_, i) {
+        var _sum = x.data.map(function (_, i) {
           return (x.data[i] - x.mean) * (y.data[i] - y.mean);
         }).reduce(function (p, n) {
           return p + n;
         }, 0);
-        return sum / (x.size - 1);
+        return _sum / (x.size - 1);
       }
     }
   }, {
@@ -563,9 +787,16 @@ var Sample = function () {
     this.data = data;
     this.size = data.length;
     this.mean = mean(data);
-    this.std = this.constructor.std(data);
+    this.std = this.constructor.stdDev(data);
     this.variance = this.constructor.variance(data);
     this.skewness = this.constructor.skewness(data);
+    this.kurtosis = this.constructor.kurtosis(data);
+    this.sqrdMeanDev = this.constructor.sqrdMeanDev(data);
+    this.meanDev = this.constructor.meanDev(data);
+    this.rootMeanSqrd = this.constructor.rootMeanSqrd(data);
+    this.stdMeanDev = this.constructor.stdMeanDev(data);
+    this.relStdDev = this.constructor.relativeStdDev(data);
+    this.quartiles = this.constructor.quartiles(data);
   }
 
   return Sample;
@@ -582,9 +813,9 @@ function tTest(sample, other, x) {
 
 
 
-var Statistics = Object.freeze({
+var statistics = Object.freeze({
 	Sample: Sample,
-	TTest: tTest
+	tTest: tTest
 });
 
-export { Distributions, Statistics, Utils };
+export { distributions, statistics, utils };

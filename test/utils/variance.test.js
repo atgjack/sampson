@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import variance from './variance';
+import { variance } from '../utils';
 
 let round = (x) => Math.round(x * 1000) / 1000;
 

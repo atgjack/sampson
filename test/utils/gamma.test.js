@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import gamma from './gamma';
+import { gamma } from '../utils';
 
 // need round for large magnitude ;-;
 let round = (x) => Math.round(x * 1000) / 1000;

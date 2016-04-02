@@ -1,6 +1,8 @@
 import test from 'blue-tape';
 
-import Sample from './sample';
+import { Sample } from '../statistics';
+
+// Test at http://www.calculatorsoup.com/calculators/statistics/descriptivestatistics.php
 
 let round = (x) => Math.round(x * 1000) / 1000;
 
@@ -10,6 +12,14 @@ test('statistics/sample', (t) => {
     t.throws( () => new Sample([]) );
     t.end();
   });
+
+  t.test('validates methods', t => {
+      t.ok( isNaN(Sample.variance([])) );
+      t.equal( Sample.stdDev([]), 0 );
+      t.ok( isNaN(Sample.skewness([0,1])) );
+      t.ok( isNaN(Sample.kurtosis([0,1])) );
+      t.end();
+    });
 
   let data = [0,1,2,3,4,5,6,7,8,9,10];
   let sample = new Sample(data);
@@ -21,9 +31,13 @@ test('statistics/sample', (t) => {
     t.equal( round(sample.std), 3.317 );
     t.equal( sample.variance, 11 );
     t.equal( sample.skewness, 0 );
-    t.ok( isNaN(Sample.variance([])) );
-    t.equal( Sample.std([]), 0 )
-    t.ok( isNaN(Sample.skewness([0,1])) )
+    t.equal( round(sample.kurtosis), 0.162);
+    t.deepEqual( sample.quartiles, [2,5,8]);
+    t.equal( round(sample.meanDev), 2.727);
+    t.equal( sample.sqrdMeanDev, 110);
+    t.equal( round(sample.rootMeanSqrd), 5.916 )
+    t.equal( round(sample.relStdDev), 0.663 )
+
     t.end();
   });
 

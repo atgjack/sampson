@@ -5,8 +5,8 @@
   "jsnext:main": "lib.es6.js",
   "scripts": {
     "build": "BABEL_ENV=dev babel-node rollup.js",
-    "tape": "BABEL_ENV=test babel-tape-runner lib/**/*.test.js",
-    "cover": "BABEL_ENV=test istanbul cover babel-tape-runner lib/**/*.test.js",
+    "tape": "BABEL_ENV=test babel-tape-runner test/**/*.test.js",
+    "cover": "BABEL_ENV=test istanbul cover babel-tape-runner test/**/*.test.js",
     "test": "npm run tape | faucet",
     "start": "npm run build"
   },
@@ -19,8 +19,11 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-tape-runner": "^2.0.1",
     "blue-tape": "^0.2.0",
+    "documentation": "^4.0.0-beta2",
     "rollup": "^0.25.7",
-    "rollup-plugin-babel": "^2.4.0"
+    "rollup-plugin-babel": "^2.4.0",
+    "rollup-plugin-uglify": "^0.3.1",
+    "uglify-js": "^2.6.2"
   },
   "babel": {
     "plugins": [

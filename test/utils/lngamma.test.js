@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import lngamma from './lngamma';
+import { lngamma } from '../utils';
 
 test('utils/lngamma', (t) => {
   t.test('can accurately generate a known value for ln(n!)', (t) => {

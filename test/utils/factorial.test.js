@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import factorial from './factorial';
+import { factorial } from '../utils';
 
 test('utils/factorial', (t) => {
   t.test('can accuratly generate a known value', (t) => {

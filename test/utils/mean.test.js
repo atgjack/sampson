@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import mean from './mean';
+import { mean } from '../utils';
 
 test('utils/mean', (t) => {
   t.test('can accurately generate a known value', (t) => {

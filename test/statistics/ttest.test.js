@@ -1,7 +1,6 @@
 import test from 'blue-tape';
 
-import tTest from './ttest';
-import Sample from './sample';
+import { Sample, tTest } from '../statistics';;
 
 let round = (x) => Math.round(x * 1000) / 1000;
 

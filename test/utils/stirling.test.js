@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import stirling from './stirling';
+import { stirling } from '../utils';
 
 test('utils/stirling', (t) => {
   t.test('can accurately generate a known value for ln(n!)', (t) => {

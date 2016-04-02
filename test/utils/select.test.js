@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import select from './select';
+import { select } from '../utils';
 
 test('utils/select', (t) => {
   t.test('can accurately generate a known value', (t) => {

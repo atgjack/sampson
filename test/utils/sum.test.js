@@ -1,6 +1,6 @@
 import test from 'blue-tape';
 
-import sum from './sum';
+import { sum } from '../utils';
 
 test('utils/sum', (t) => {
   t.test('can accurately generate a known value', (t) => {
