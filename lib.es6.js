@@ -52,17 +52,18 @@ babelHelpers;
 
 // http://blog.plover.com/math/choose.html
 function choose(n, k) {
-  if (k > n) throw new Error('k cannot be greater than n.');
-  var r = 1;
-  for (var d = 1; d <= k; d++) {
-    r *= n--;
-    r /= d;
-  }
-  return r;
+  if (k > n) return NaN;else {
+    var r = 1;
+    for (var d = 1; d <= k; d++) {
+      r *= n--;
+      r /= d;
+    }
+    return r;
+  };
 };
 
 function factorial(n) {
-  if (n < 0) return -1;else if (n == 0) return 1;else return n * factorial(n - 1);
+  if (n < 0) return NaN;else if (n == 0) return 1;else return n * factorial(n - 1);
 };
 
 var GAMMA_NUM_LN = 607 / 128;
@@ -85,7 +86,7 @@ function gamma(input) {
   if (z < 0.5) {
     return Math.PI / (Math.sin(Math.PI * z) * gamma(1 - z));
   } else if (z > 100) {
-    Math.exp(lngamma(z));
+    return Math.exp(lngamma(z));
   } else {
     z -= 1;
     var x = GAMMA_TABLE[0];
@@ -113,15 +114,6 @@ function mean(x) {
   return x.length == 0 ? NaN : sum(x) / x.length;
 };
 
-function std(x) {
-  var v = variance(x);
-  return isNaN(v) ? 0 : Math.sqrt(v);
-};
-
-function sterling$1(n) {
-  return (n + .5) * Math.log(n) - n + Math.log(2 * Math.PI) / 2;
-};
-
 function sumNthPowerDev(x, n) {
   var mu = mean(x);
   return x.reduce(function (p, next) {
@@ -129,27 +121,36 @@ function sumNthPowerDev(x, n) {
   }, 0);
 };
 
-function variance$1(x) {
+function variance(x) {
   return x.length == 0 ? NaN : sumNthPowerDev(x, 2) / x.length;
 };
 
-function zscore(z, mu, std) {
+function std(x) {
+  var v = variance(x);
+  return isNaN(v) ? 0 : Math.sqrt(v);
+};
+
+function stirling(n) {
+  return (n + .5) * Math.log(n) - n + Math.log(2 * Math.PI) / 2;
+};
+
+function zscore(x, mu, std) {
   return (x - mu) / std;
 };
 
 
 
-var Utils$1 = Object.freeze({
+var Utils = Object.freeze({
 	choose: choose,
 	factorial: factorial,
 	gamma: gamma,
 	lngamma: lngamma,
 	mean: mean,
 	std: std,
-	stirling: sterling$1,
+	stirling: stirling,
 	sum: sum,
 	sumNthPowerDev: sumNthPowerDev,
-	variance: variance$1,
+	variance: variance,
 	zscore: zscore
 });
 
@@ -498,15 +499,14 @@ var Distributions = Object.freeze({
 	Binomial: BinomialDistribution,
 	Bernoulli: BernoulliDistribution,
 	Cauchy: CauchyDistribution,
-	Gamma: GammaDistribution,
-	Utils: Utils
+	Gamma: GammaDistribution
 });
 
 var Sample = function () {
   babelHelpers.createClass(Sample, null, [{
     key: 'variance',
     value: function variance(x) {
-      return x.length == 0 ? NaN : sumNthPowerDev(x, 2) / x.length - 1;
+      return x.length == 0 ? NaN : sumNthPowerDev(x, 2) / (x.length - 1);
     }
   }, {
     key: 'std',
@@ -528,7 +528,7 @@ var Sample = function () {
   }, {
     key: 'covariance',
     value: function covariance(x, y) {
-      if (x.size <= 1 || x.size !== y.size) return NaN;else {
+      if (!x || !y || x.size <= 1 || x.size !== y.size) return NaN;else {
         var sum = x.data.map(function (_, i) {
           return (x.data[i] - x.mean) * (y.data[i] - y.mean);
         }).reduce(function (p, n) {
@@ -540,7 +540,7 @@ var Sample = function () {
   }, {
     key: 'correlation',
     value: function correlation(x, y) {
-      if (!x || !x.std || !y || !y.std) throw new Error('Need to use two Sample objects.');
+      if (!x || !x.std || !y || !y.std) return NaN;
       var cov = this.covariance(x, y);
       return cov / x.std / y.std;
     }
@@ -571,8 +571,8 @@ var Sample = function () {
   return Sample;
 }();
 
-function tTest(sample, other, x) {
-  if (!sample) throw new Error('Need a valid sample.');
+function tTest(sample, x, other) {
+  if (!sample) return NaN;
   if (!other) return (sample.mean - x) / (sample.std / Math.sqrt(sample.size));else {
     var difference = x || 0;
     var weightedVar = ((sample.size - 1) * sample.variance + (other.size - 1) * other.variance) / (sample.size + other.size - 2);
@@ -587,4 +587,4 @@ var Statistics = Object.freeze({
 	TTest: tTest
 });
 
-export { Distributions, Statistics, Utils$1 as Utils };
+export { Distributions, Statistics, Utils };

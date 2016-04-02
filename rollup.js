@@ -10,7 +10,8 @@ rollup.rollup({
     dest: 'lib.es6.js'
   })
   bundle.write({
-    format: 'cjs',
+    format: 'umd',
+    moduleName: 'probably',
     dest: 'lib.js'
   })
-})
+}).catch( err => console.log(err) )
