@@ -5,11 +5,11 @@
   "main": "lib.js",
   "jsnext:main": "lib.es6.js",
   "scripts": {
-    "build": "BABEL_ENV=dev babel-node rollup.js",
-    "tape": "BABEL_ENV=test babel-tape-runner test/**/*.test.js",
-    "cover": "BABEL_ENV=test istanbul cover babel-tape-runner test/**/*.test.js",
-    "test": "npm run tape | faucet",
-    "doc": "documentation build -f md lib/main.js > api.md",
+    "tape":  "BABEL_ENV=test node_modules/.bin/babel-tape-runner test/**/*.test.js",
+    "cover": "BABEL_ENV=test node_modules/.bin/istanbul cover babel-tape-runner test/**/*.test.js",
+    "doc":   "node_modules/.bin/documentation build -f md lib/main.js > api.md",
+    "build": "BABEL_ENV=build node rollup.js",
+    "test":  "npm run tape | faucet",
     "start": "npm run cover && npm run doc && npm run build"
   },
   "devDependencies": {
@@ -38,7 +38,7 @@
           "stage-0"
         ]
       },
-      "dev": {
+      "build": {
         "presets": [
           "es2015-rollup",
           "stage-0"

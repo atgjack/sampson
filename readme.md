@@ -2,13 +2,15 @@
 
 ### **Currently has the following:**
 
+### [Documentation](./api.md)
+
 ### Distributions
 
 - Bernoulli
 - Binomial
-- Cauchy
-- Gamma
-- Normal
+- Cauchy  (Soon - Needs Testing)
+- Gamma   (Soon - Needs Testing)
+- Normal  (Soon - Needs Testing)
 
 ### Statistics
 
@@ -20,8 +22,14 @@
 - n Choose k
 - Factorial
 - Gamma
-- lnGamma
+- Log-Gamma
 - Mean
+- Median
+- Mode
+- Percentile
+- Quantile
+- Range
+- Select
 - Standard Deviation
 - Stirling Approximation
 - Summation

@@ -18,9 +18,9 @@ test('distributions/cauchy', (t) => {
     t.throws( () => random(-1) );
 
     // Generate 10000 values and make sure they are within a few decimals of 0.
-    let values = Array.apply(null, Array(10000)).map( (_,i) => i ).map( i => random(1) )
-    let average = Math.round(values.reduce( (prev, next) => prev + next ) / (10000))
-    t.ok( average >= -5 && average <= 5 );
+    // let values = Array.apply(null, Array(10000)).map( (_,i) => i ).map( i => random(1) )
+    // let average = Math.round(values.reduce( (prev, next) => prev + next ) / (10000))
+    // t.ok( average >= -5 && average <= 5 );
 
     t.end();
   });
