@@ -9,7 +9,7 @@
     "cover": "BABEL_ENV=test node_modules/.bin/istanbul cover babel-tape-runner test/**/*.test.js",
     "doc":   "node_modules/.bin/documentation build -f md lib/main.js > api.md",
     "build": "BABEL_ENV=build node rollup.js",
-    "test":  "npm run tape | faucet",
+    "test":  "npm run tape | node_modules/.bin/faucet",
     "start": "npm run cover && npm run doc && npm run build"
   },
   "devDependencies": {
