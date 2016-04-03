@@ -480,162 +480,7 @@
   	zscore: zscore
   });
 
-  var GammaDistribution = function () {
-    babelHelpers.createClass(GammaDistribution, null, [{
-      key: 'random',
-      value: function random(a, b) {
-        return console.log('this is wrong');
-      }
-    }, {
-      key: 'pmf',
-      value: function pmf(x, a, b) {
-        if (x < 0) {
-          return 0;
-        } else if (x == 0) {
-          if (a == 1) return 1 / b;else return 0;
-        } else if (a == 1) {
-          return Math.exp(-x / b) / b;
-        } else {
-          return Math.exp((a - 1) * Math.log(x / b) - x / b - lngamma(a)) / b;
-        };
-      }
-    }]);
-
-    function GammaDistribution(a, b) {
-      var _this = this;
-
-      babelHelpers.classCallCheck(this, GammaDistribution);
-
-      this.pdf = function (x) {
-        return _this.constructor.pdf(x, _this.a, _this.b);
-      };
-
-      this.random = function () {
-        return _this.constructor.random(_this.a, _this.b);
-      };
-
-      this.sample = function (n) {
-        return Array.apply(null, Array(n)).map(function () {
-          return _this.random();
-        });
-      };
-
-      this.a = a;
-      this.b = b;
-      this.mu = a / b;
-      this.variance = a / (b * b);
-    }
-
-    return GammaDistribution;
-  }();
-
-  GammaDistribution.covariates = 2;
-  GammaDistribution.discrete = false;
-
-  var last = NaN;
-
-  var NormalDistribution = function () {
-    babelHelpers.createClass(NormalDistribution, null, [{
-      key: 'random',
-      value: function random(mu, sigma) {
-        if (!mu || !sigma) throw new Error('Need mu and sigma for the normal distribution.');
-        var z = last;
-        last = NaN;
-        if (!z) {
-          var a = Math.random() * 2 * Math.PI;
-          var b = Math.sqrt(-2.0 * Math.log(1.0 - Math.random()));
-          z = Math.cos(a) * b;
-          last = Math.sin(a) * b;
-        }
-        return mu + z * sigma;
-      }
-    }, {
-      key: 'pdf',
-      value: function pdf(x, mu, sigma) {
-        var u = x / Math.abs(sigma);
-        return 1 / (Math.sqrt(2 * Math.PI) * Math.abs(sigma)) * Math.exp(-1 * Math.pow(x - mu, 2) / (2 * sigma * sigma));
-      }
-    }]);
-
-    function NormalDistribution(mu, sigma) {
-      var _this = this;
-
-      babelHelpers.classCallCheck(this, NormalDistribution);
-
-      this.pdf = function (x) {
-        return _this.constructor.pdf(x, _this.mu, _this.sigma);
-      };
-
-      this.random = function () {
-        return _this.constructor.random(_this.mu, _this.sigma);
-      };
-
-      this.sample = function (n) {
-        return Array.apply(null, Array(n)).map(function () {
-          return _this.random();
-        });
-      };
-
-      if (!mu || !sigma) throw new Error('Need mu and sigma for the normal distribution.');
-      this.mu = mu;
-      this.sigma = sigma;
-      this.variance = sigma * sigma;
-    }
-
-    return NormalDistribution;
-  }();
-
-  NormalDistribution.covariates = 2;
-  NormalDistribution.discrete = false;
-
-  var CauchyDistribution = function () {
-    babelHelpers.createClass(CauchyDistribution, null, [{
-      key: 'random',
-      value: function random(a) {
-        if (a == undefined || a <= 0) throw new Error('a must be positive and greater than zero.');
-        var u = void 0;
-        while (!u || u == 0.5) {
-          u = Math.random();
-        }return a * Math.tan(Math.PI * u);
-      }
-    }, {
-      key: 'pdf',
-      value: function pdf(x, a) {
-        var u = x / a;
-        return 1 / (Math.PI * a) / (1 + u * u);
-      }
-    }]);
-
-    function CauchyDistribution(a) {
-      var _this = this;
-
-      babelHelpers.classCallCheck(this, CauchyDistribution);
-
-      this.pdf = function (x) {
-        return _this.constructor.pdf(x, _this.a);
-      };
-
-      this.random = function () {
-        return _this.constructor.random(_this.a);
-      };
-
-      this.sample = function (n) {
-        return Array.apply(null, Array(n)).map(function () {
-          return _this.random();
-        });
-      };
-
-      if (a == undefined || a <= 0) throw new Error('a must be positive and greater than zero.');
-      this.a = a;
-    }
-
-    return CauchyDistribution;
-  }();
-
-  CauchyDistribution.covariates = 1;
-  CauchyDistribution.discrete = false;
-
-  var SMALL_MEAN$1 = 14;
+  var SMALL_MEAN = 14;
 
   var BinomialDistribution = function () {
     babelHelpers.createClass(BinomialDistribution, null, [{
@@ -655,7 +500,7 @@
         var q = 1 - p;
         var s = p / q;
         var np = n * p;
-        if (np < SMALL_MEAN$1) {
+        if (np < SMALL_MEAN) {
           var f = Math.pow(q, n);
           var u = Math.random();
           while (ix <= n && u >= f) {
@@ -832,11 +677,8 @@
 
 
   var distributions = Object.freeze({
-  	Normal: NormalDistribution,
   	Binomial: BinomialDistribution,
-  	Bernoulli: BernoulliDistribution,
-  	Cauchy: CauchyDistribution,
-  	Gamma: GammaDistribution
+  	Bernoulli: BernoulliDistribution
   });
 
   var Sample = function () {
