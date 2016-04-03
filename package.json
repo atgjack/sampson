@@ -5,11 +5,11 @@
   "main": "lib.js",
   "jsnext:main": "lib.es6.js",
   "scripts": {
-    "tape":  "BABEL_ENV=test node_modules/.bin/babel-tape-runner test/**/*.test.js",
+    "tape": "BABEL_ENV=test node_modules/.bin/babel-tape-runner test/**/*.test.js",
     "cover": "BABEL_ENV=test node_modules/.bin/istanbul cover babel-tape-runner test/**/*.test.js",
-    "doc":   "node_modules/.bin/documentation build -f md lib/main.js > api.md",
+    "doc": "node_modules/.bin/documentation build -f md lib/main.js > api.md",
     "build": "BABEL_ENV=build node rollup.js",
-    "test":  "npm run tape | node_modules/.bin/faucet",
+    "test": "npm run tape | node_modules/.bin/faucet",
     "start": "npm run cover && npm run doc && npm run build"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "babel-tape-runner": "^2.0.1",
     "blue-tape": "^0.2.0",
     "documentation": "^4.0.0-beta2",
+    "faucet": "0.0.1",
     "rollup": "^0.25.7",
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-uglify": "^0.3.1",
