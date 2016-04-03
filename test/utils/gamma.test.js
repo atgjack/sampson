@@ -6,6 +6,12 @@ import { gamma } from '../utils';
 let round = (x) => Math.round(x * 1000) / 1000;
 
 test('utils/gamma', (t) => {
+  t.test('is infinite at negative integers', (t) => {
+    t.equal( round(gamma(-1)), Infinity );
+    t.equal( round(gamma(-3)), Infinity );
+    t.end();
+  });
+
   t.test('can accurately generate a known value', (t) => {
     let data = .5;
     let answer = 1.772;

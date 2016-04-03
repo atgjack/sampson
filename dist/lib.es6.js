@@ -65,7 +65,15 @@ babelHelpers.toConsumableArray = function (arr) {
 
 babelHelpers;
 
-// http://blog.plover.com/math/choose.html
+/**
+ * See: [Binomial Coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient)
+ *
+ * Choose k elements from a set of n elements.
+ * `k > n == Infinity`
+ *
+ *
+ * Code kanged from: [Blog of Mark Dominus](http://blog.plover.com/math/choose.html)
+ */
 function choose(n, k) {
   if (k > n) return NaN;else {
     var r = 1;
@@ -77,6 +85,16 @@ function choose(n, k) {
   };
 };
 
+/**
+ * See: [Factorial](https://en.wikipedia.org/wiki/Factorial)
+ *
+ * n! is the product of all positive integers less than or equal to n.
+ * ```
+ * 0! == 1
+ * n > ~170 == Infinity
+ * n < 0 == NaN
+ * ```
+ */
 function factorial(n) {
   if (n < 0) return NaN;else if (n == 0) return 1;else return n * factorial(n - 1);
 };
@@ -84,6 +102,15 @@ function factorial(n) {
 var GAMMA_NUM_LN = 607 / 128;
 var GAMMA_TABLE_LN = [0.99999999999999709182, 57.156235665862923517, -59.597960355475491248, 14.136097974741747174, -0.49191381609762019978, 0.33994649984811888699e-4, 0.46523628927048575665e-4, -0.98374475304879564677e-4, 0.15808870322491248884e-3, -0.21026444172410488319e-3, 0.21743961811521264320e-3, -0.16431810653676389022e-3, 0.84418223983852743293e-4, -0.26190838401581408670e-4, 0.36899182659531622704e-5];
 
+/**
+ * See: [Log-Gamma Function](https://en.wikipedia.org/wiki/Gamma_function#The_log-gamma_function)
+ *
+ * The log-gamma function is a useful general function.
+ * It can handle much larger numbers because it grows much slower compared to the gamma function.
+ * It's (n - 1)! and is used by the gamma function for n > 100.
+ *
+ * Code kanged from: [gamma.js](https://github.com/substack/gamma.js/blob/master/index.js)
+ */
 function lngamma(z) {
   if (z < 0) return NaN;
   var x = GAMMA_TABLE_LN[0];
@@ -96,9 +123,23 @@ function lngamma(z) {
 var GAMMA_NUM = 7;
 var GAMMA_TABLE = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
 
-function gamma(input) {
-  var z = input;
-  if (z < 0.5) {
+/**
+ * See: [Gamma Function](https://en.wikipedia.org/wiki/Gamma_function)
+ *
+ * The gamma function is a useful general function. It's (n - 1)!.
+ *
+ * #### Restrictions:
+ * ```
+ * gamma(-1) == Infinity
+ * ```
+ *
+ * Code kanged from: [gamma.js](https://github.com/substack/gamma.js/blob/master/index.js)
+ */
+function gamma(n) {
+  var z = n;
+  if (z < 0 && z % 1 == 0) {
+    return Infinity;
+  } else if (z < 0.5) {
     return Math.PI / (Math.sin(Math.PI * z) * gamma(1 - z));
   } else if (z > 100) {
     return Math.exp(lngamma(z));
@@ -113,7 +154,15 @@ function gamma(input) {
   };
 };
 
-// https://github.com/simple-statistics/simple-statistics/blob/master/src/sum.js
+/**
+ * See: [Summation](https://en.wikipedia.org/wiki/Summation)
+ *
+ * Adds a list of elements together.
+ * Uses the [Kahan summation algorithm](https://en.wikipedia.org/wiki/Kahan_summation_algorithm)
+ * to compensate for floating-point error.
+ *
+ * Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/blob/master/src/sum.js)
+ */
 function sum(x) {
   if (x.length == 0) return 0;
   var errorComp = 0;
@@ -125,10 +174,28 @@ function sum(x) {
   }, 0);
 };
 
+/**
+ * See: [Mean](https://en.wikipedia.org/wiki/Mean)
+ *
+ * Averages a list of elements. Uses our internal sum function.
+ */
 function mean(x) {
   return x.length == 0 ? NaN : sum(x) / x.length;
 };
 
+/**
+ * See: [Mode](https://en.wikipedia.org/wiki/Mode)
+ *
+ * Finds the most frequent values of a list of numbers.
+ * It always returns an array.
+ * The result may contain one or more values.
+ *
+ * #### Restrictions:
+ * ```
+ * mode( [] ) == NaN
+ * mode( [1] ) == [1]
+ * ```
+ */
 function mode(list) {
   if (list.length == 0) return NaN;else if (list.length == 1) return list;else {
     var _ret = function () {
@@ -158,7 +225,19 @@ function mode(list) {
 var LIST_LIMIT = 600;
 var LIST_SCALE = .5;
 
-function quickselect(array, k, begin, end) {
+/**
+ * See: [Selection](https://en.wikipedia.org/wiki/Selection_algorithm)
+ *
+ * Efficiently finds the kth largest element in a array.
+ *
+ * #### Restrictions:
+ * ```
+ * select( null, 1 ) == NaN     // Error
+ * ```
+ *
+ * Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/pull/146/files)
+ */
+function select(array, k, begin, end) {
   var list = array.slice(0);
   if (list.length == 0 || k >= list.length) return NaN;
   var left = begin || 0;
@@ -173,7 +252,7 @@ function quickselect(array, k, begin, end) {
         var sd = LIST_SCALE * Math.sqrt(z * s * (n - s) / n);
         var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
         var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
-        quickselect(list, k, newLeft, newRight);
+        select(list, k, newLeft, newRight);
       }
       var t = list[k];
       var i = left;
@@ -211,29 +290,69 @@ function swap(list, i, j) {
   list[j] = temp;
 }
 
+/**
+ * See: [Median](https://en.wikipedia.org/wiki/Median)
+ *
+ * Finds the central most value for a list of numbers.
+ * If the list is even, and has no single center, the two
+ * inner-most values are averaged.
+ * Uses our internal selection function.
+ *
+ * #### Restrictions:
+ * ```
+ * median( [] ) == NaN
+ * ```
+ */
 function median(list) {
   var result = void 0;
   if (list.length == 0) result = NaN;else {
     var even = list.length % 2 == 0;
     if (even) {
-      result = quickselect(list, list.length / 2);
-      result += quickselect(list, list.length / 2 - 1);
+      result = select(list, list.length / 2);
+      result += select(list, list.length / 2 - 1);
       result /= 2;
     } else {
-      result = quickselect(list, (list.length - 1) / 2);
+      result = select(list, (list.length - 1) / 2);
     };
   };
   return result;
 }
 
+/**
+ * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
+ *
+ * Finds the element of a list of numbers at a certain percentile ordered smallest to largest.
+ *
+ * #### Restrictions:
+ * ```
+ * percentile( null, .5 )     // Error
+ * percentile( [1,2,3], p<0 ) // Error
+ * percentile( [1,2,3], p>1 ) // Error
+ * percentile( [], .5 )       // NaN
+ * ```
+ */
 function percentile(list, p) {
-  if (p == undefined || p > 1 || p < 0) throw new Error('p must be between zero and 1 inclusive.');
-  if (!list) throw new Error('need a list to rank.');
-  var index = Math.floor(list.length * p);
-  if (index >= list.length) index = list.length - 1;
-  return quickselect(list, index);
-}
+  if (p == undefined || p > 1 || p < 0) throw new Error('p must be between zero and one inclusive.');else if (list == undefined) throw new Error('need a list to provide a percentile.');else if (list.length == 0) return NaN;else {
+    var index = Math.floor(list.length * p);
+    if (index >= list.length) index = list.length - 1;
+    return select(list, index);
+  };
+};
 
+/**
+ * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
+ *
+ * Finds the nth largest element of a list of numbers.
+ * Accepts both a single quantile and an array of quantiles.
+ *
+ * #### Restrictions:
+ * ```
+ * quantile( null, 1 )      // Error
+ * quantile( [], 1 )        // Error
+ * quantile( [1,2,3], p<0 ) // Error
+ * quantile( [1,2,3], p>1 ) // Error
+ * ```
+ */
 function quantile(list) {
   if (list == undefined || list.length == 0) throw new Error('you must provide an array.');
 
@@ -252,20 +371,33 @@ function quantile(list) {
     if (quant == 0) return list[0];else if (quant == 1) return list[list.length - 1];else {
       var index = list.length * quant;
       if (index % 1) {
-        return quickselect(list, Math.floor(index));
+        return select(list, Math.floor(index));
       } else if (list.length % 2) {
-        return quickselect(list, index);
+        return select(list, index);
       } else {
-        return (quickselect(list, index - 1) + quickselect(list, index)) / 2;
+        return (select(list, index - 1) + select(list, index)) / 2;
       };
     };
   };
 };
 
+/**
+ * See: [Range](https://en.wikipedia.org/wiki/Range_(statistics))
+ *
+ * Finds the difference between the largest and smallest values.
+ */
 function range(list) {
   return Math.max.apply(Math, babelHelpers.toConsumableArray(list)) - Math.min.apply(Math, babelHelpers.toConsumableArray(list));
 }
 
+/**
+ * A really useful function. Takes a set of observations and returns the sum of
+ * the difference of each observation and the mean of the set raised to the nth power.
+ * Can be used to find the absolute value of the difference for functions like MeanDeviation,
+ * or by default, the signed values for functions like Variance and SquaredMeanDeviation.
+ *
+ * Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/blob/master/src/sum_nth_power_deviations.js)
+ */
 function sumNthPowerDev(x, n, absolute) {
   if (x.length == 0) return NaN;else {
     var _ret = function () {
@@ -283,19 +415,39 @@ function sumNthPowerDev(x, n, absolute) {
   };
 };
 
+/**
+ * See: [Variance](https://en.wikipedia.org/wiki/Variance)
+ *
+* A measure that is used to quantify the amount of variation of a set of data values from their mean value.
+*/
 function variance(x) {
   return x.length == 0 ? NaN : sumNthPowerDev(x, 2) / x.length;
 };
 
+/**
+ * See: [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation)
+ *
+ * A measure that is used to quantify the amount of variation of a set of data values.
+ */
 function std(x) {
   var v = variance(x);
   return isNaN(v) ? 0 : Math.sqrt(v);
 };
 
+/**
+ * See: [Stirling's Approximation](https://en.wikipedia.org/wiki/Stirling%27s_approximation)
+ *
+ * Efficiently appoximates ln(n!). Similar to the gamma function, but can be faster and more accurate.
+ */
 function stirling(n) {
   return (n + .5) * Math.log(n) - n + Math.log(2 * Math.PI) / 2;
 };
 
+/**
+ * See: [Standard Score](https://en.wikipedia.org/wiki/Standard_score)
+ *
+ * The signed number of deviations an observed value is above the mean.
+ */
 function zscore(x, mu, std) {
   return (x - mu) / std;
 };
@@ -313,7 +465,7 @@ var utils = Object.freeze({
 	percentile: percentile,
 	quantile: quantile,
 	range: range,
-	select: quickselect,
+	select: select,
 	std: std,
 	stirling: stirling,
 	sum: sum,
