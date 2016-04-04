@@ -452,32 +452,40 @@ function zscore(x, mu, std) {
   return (x - mu) / std;
 };
 
-
-
-var utils = Object.freeze({
-	choose: choose,
-	factorial: factorial,
-	gamma: gamma,
-	lngamma: lngamma,
-	median: median,
-	mean: mean,
-	mode: mode,
-	percentile: percentile,
-	quantile: quantile,
-	range: range,
-	select: select,
-	std: std,
-	stirling: stirling,
-	sum: sum,
-	sumNthPowerDev: sumNthPowerDev,
-	variance: variance,
-	zscore: zscore
-});
-
 var SMALL_MEAN = 14;
 
 var BinomialDistribution = function () {
   babelHelpers.createClass(BinomialDistribution, null, [{
+    key: 'mean',
+    value: function mean(p, n) {
+      return n * p;
+    }
+  }, {
+    key: 'variance',
+    value: function variance(p, n) {
+      return n * p * (1 - p);
+    }
+  }, {
+    key: 'stdDev',
+    value: function stdDev(p, n) {
+      return Math.sqrt(n * p * (1 - p));
+    }
+  }, {
+    key: 'relativeStdDev',
+    value: function relativeStdDev(p, n) {
+      return Math.sqrt((1 - p) / (n * p));
+    }
+  }, {
+    key: 'skewness',
+    value: function skewness(p, n) {
+      return (1 - 2 * p) / Math.sqrt(n * p * (1 - p));
+    }
+  }, {
+    key: 'kurtosis',
+    value: function kurtosis(p, n) {
+      return 3 - 6 / n + 1 / (n * p * (1 - p));
+    }
+  }, {
     key: 'random',
     value: function random(prob, n) {
       if (typeof prob != 'number' || prob > 1 || prob < 0) throw new Error("p must be between 0 and 1.");
@@ -566,6 +574,15 @@ var BinomialDistribution = function () {
       return Math.floor(flipped ? n - ix : ix);
     }
   }, {
+    key: 'sample',
+    value: function sample(k, p, n) {
+      var _this = this;
+
+      return Array.apply(null, Array(k)).map(function () {
+        return _this.random(p, n);
+      });
+    }
+  }, {
     key: 'pmf',
     value: function pmf(k, p, n) {
       if (k < 0 || k > n) return 0;else {
@@ -586,19 +603,48 @@ var BinomialDistribution = function () {
         return P;
       };
     }
+  }, {
+    key: 'cdf',
+    value: function cdf(k, p, n) {
+      if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");else if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");else if (k < 0) return 0;else return Array.apply(null, Array(Math.floor(k))).map(function (_, i) {
+        return choose(n, i) * Math.pow(p, i) * Math.pow(1 - p, n - i);
+      }).reduce(function (prev, next) {
+        return prev + next;
+      }, 0);
+    }
   }]);
 
   function BinomialDistribution(p, n) {
+    var _this2 = this;
+
     babelHelpers.classCallCheck(this, BinomialDistribution);
 
-    _initialiseProps.call(this);
+    this.pdf = function (k) {
+      return _this2.constructor.pmf(k, _this2.p, _this2.n);
+    };
+
+    this.cdf = function (k) {
+      return _this2.constructor.cdf(k, _this2.p, _this2.n);
+    };
+
+    this.random = function () {
+      return _this2.constructor.random(_this2.p, _this2.n);
+    };
+
+    this.sample = function (k) {
+      return _this2.constructor.sample(k, _this2.p, _this2.n);
+    };
 
     if (p == undefined || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
     if (n == undefined || n < 0) throw new Error("n must be positive or zero.");
     this.p = p;
     this.n = n;
-    this.mu = n * p;
-    this.variance = n * p * (1 - p);
+    this.mu = this.constructor.mean(p, n);
+    this.variance = this.constructor.variance(p, n);
+    this.stdDev = this.constructor.stdDev(p, n);
+    this.relStdDev = this.constructor.relativeStdDev(p, n);
+    this.skewness = this.constructor.skewness(p, n);
+    this.kurtosis = this.constructor.kurtosis(p, n);
   }
 
   return BinomialDistribution;
@@ -606,24 +652,6 @@ var BinomialDistribution = function () {
 
 BinomialDistribution.covariates = 2;
 BinomialDistribution.discrete = true;
-
-var _initialiseProps = function _initialiseProps() {
-  var _this = this;
-
-  this.pdf = function (k) {
-    return _this.constructor.pmf(k, _this.p, _this.n);
-  };
-
-  this.random = function () {
-    return _this.constructor.random(_this.p, _this.n);
-  };
-
-  this.sample = function (n) {
-    return Array.apply(null, Array(n)).map(function () {
-      return _this.random();
-    });
-  };
-};
 
 var BernoulliDistribution = function (_BinomialDistribution) {
   babelHelpers.inherits(BernoulliDistribution, _BinomialDistribution);
@@ -639,6 +667,11 @@ var BernoulliDistribution = function (_BinomialDistribution) {
     value: function pmf(k, p) {
       if (k == 0) return 1 - p;else if (k == 1) return p;else return 0;
     }
+  }, {
+    key: 'cdf',
+    value: function cdf(k, p) {
+      if (k == 1) return 1 - p;else if (k == 0) return p;else return NaN;
+    }
   }]);
 
   function BernoulliDistribution(p) {
@@ -648,6 +681,10 @@ var BernoulliDistribution = function (_BinomialDistribution) {
 
     _this.pdf = function (k) {
       return _this.constructor.pmf(k, _this.p);
+    };
+
+    _this.cdf = function (k) {
+      return _this.constructor.cdf(k, _this.p);
     };
 
     _this.random = function () {
@@ -668,12 +705,96 @@ var BernoulliDistribution = function (_BinomialDistribution) {
 
 BernoulliDistribution.covariates = 1;
 
+//http://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.stats.t.html
+//https://github.com/chbrown/nlp/blob/master/src/main/java/cc/mallet/util/StatFunctions.java - CDF - ln236
 
+var StudentsTDistribution = function () {
+  babelHelpers.createClass(StudentsTDistribution, null, [{
+    key: 'random',
+    value: function random(df) {
+      throw new Error('not implemented.');
+    }
+  }, {
+    key: 'pdf',
+    value: function pdf(t, df) {
+      if (df <= 0) return NaN;else {
+        return gamma((df + 1) / 2) / (Math.sqrt(Math.PI * df) * gamma(df / 2) * Math.pow(Math.pow(1 + t, 2 / df), -(df + 1) / 2));
+      }
+    }
+  }, {
+    key: 'cdf',
+    value: function cdf(t, df) {
+      if (df <= 0) return NaN;else {
+        var a = void 0,
+            b = void 0,
+            idf = void 0,
+            im2 = void 0,
+            ioe = void 0,
+            s = void 0,
+            c = void 0,
+            ks = void 0,
+            fk = void 0,
+            k = void 0;
+        var g1 = 1 / Math.PI;
+        idf = df;
+        a = t / Math.sqrt(idf);
+        b = idf / (idf + t * t);
+        im2 = df - 2;
+        ioe = idf % 2;
+        s = 1;
+        c = 1;
+        idf = 1;
+        ks = 2 + ioe;
+        fk = ks;
+        if (im2 >= 2) {
+          for (k = ks; k <= im2; k += 2) {
+            c = c * b * (fk - 1) / fk;
+            s += c;
+            if (s != idf) {
+              idf = s;
+              fk += 2;
+            }
+          }
+        }
+        if (ioe != 1) return .5 + .5 * a * Math.sqrt(b) * s;else {
+          if (df == 1) s = 0;
+          return .5 + (a * b * s + Math.atan(a)) * g1;
+        };
+      };
+    }
+  }]);
 
-var distributions = Object.freeze({
-	Binomial: BinomialDistribution,
-	Bernoulli: BernoulliDistribution
-});
+  function StudentsTDistribution(df) {
+    var _this = this;
+
+    babelHelpers.classCallCheck(this, StudentsTDistribution);
+
+    this.pdf = function (t) {
+      return _this.constructor.pdf(t, _this.df);
+    };
+
+    this.cdf = function (t) {
+      return _this.constructor.cdf(t, _this.df);
+    };
+
+    this.random = function () {
+      return _this.constructor.random(_this.df);
+    };
+
+    this.sample = function (n) {
+      return Array.apply(null, Array(n)).map(function () {
+        return _this.random();
+      });
+    };
+
+    if (df >= 0) throw RangeError('df must be greater than zero.');
+    this.df = df;
+  }
+
+  return StudentsTDistribution;
+}();
+
+StudentsTDistribution.covariates = 1;
 
 var Sample = function () {
   babelHelpers.createClass(Sample, null, [{
@@ -796,20 +917,4 @@ var Sample = function () {
   return Sample;
 }();
 
-function tTest(sample, other, x) {
-  if (!sample) return NaN;
-  if (!other) return (sample.mean - x) / (sample.std / Math.sqrt(sample.size));else {
-    var difference = x || 0;
-    var weightedVar = ((sample.size - 1) * sample.variance + (other.size - 1) * other.variance) / (sample.size + other.size - 2);
-    return (sample.mean - other.mean - difference) / Math.sqrt(weightedVar * (1 / sample.size + 1 / other.size));
-  }
-}
-
-
-
-var statistics = Object.freeze({
-	Sample: Sample,
-	tTest: tTest
-});
-
-export { distributions, statistics, utils };
+export { choose, factorial, gamma, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, BinomialDistribution as Binomial, BernoulliDistribution as Bernoulli, StudentsTDistribution as StudentsT, Sample, tTest };
