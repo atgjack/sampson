@@ -9,8 +9,8 @@
 - Bernoulli
 - Binomial
 - Normal
+- Gamma
 - Cauchy      (Soon)
-- Gamma       (Soon)
 - Chi-Square  (Soon)
 - Student's T (Partial - Missing random value generation.)
 
@@ -25,6 +25,7 @@
 - Error Function
 - Factorial
 - Gamma
+- Lower Incomplete Gamma Function
 - Log-Gamma
 - Mean
 - Median
