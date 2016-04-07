@@ -9,17 +9,17 @@ test('statistics/ttest', (t) => {
   let ssample = new Sample([3,4,5,4,6,1]);
 
   t.test('no-sample ttest return NaN', t => {
-    t.ok( isNaN( tTest() ) );
+    t.ok( isNaN( ttest() ) );
     t.end();
   });
 
   t.test('one-sample ttest', t => {
-    t.equal( round(tTest(sample, null, 0)), 4.583 );
+    t.equal( round(ttest(sample, null, 0)), 4.583 );
     t.end()
   });
 
   t.test('two-sample ttest', t => {
-    t.equal( round(tTest(sample, ssample)), -.321 );
+    t.equal( round(ttest(sample, ssample)), -.321 );
     t.end()
   });
 

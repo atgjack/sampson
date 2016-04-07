@@ -66,14 +66,13 @@ babelHelpers.toConsumableArray = function (arr) {
 babelHelpers;
 
 /**
- * See: [Binomial Coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient)
- *
  * Choose k elements from a set of n elements.
- * `k > n == Infinity`
- *
- *
- * Code kanged from: [Blog of Mark Dominus](http://blog.plover.com/math/choose.html)
+ * See: [Binomial Coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient)
+ * @param {number} n - The number of elements to choose from.
+ * @param {number} k - The number of elements to choose.
+ * @return {number} A binomial coefficient or NaN if n < k.
  */
+// Code kanged from: [Blog of Mark Dominus](http://blog.plover.com/math/choose.html)
 function choose(n, k) {
   if (k > n) return NaN;else {
     var r = 1;
@@ -86,14 +85,10 @@ function choose(n, k) {
 };
 
 /**
- * See: [Factorial](https://en.wikipedia.org/wiki/Factorial)
- *
  * n! is the product of all positive integers less than or equal to n.
- * ```
- * 0! == 1
- * n > ~170 == Infinity
- * n < 0 == NaN
- * ```
+ * [See](https://en.wikipedia.org/wiki/Factorial)
+ * @param {number} n - The number.
+ * @return {number} n!, or 1 if n == 0, or Inifinity if n > ~170, or NaN if n < 0.
  */
 function factorial(n) {
   if (n < 0) return NaN;else if (n == 0) return 1;else return n * factorial(n - 1);
@@ -103,14 +98,14 @@ var GAMMA_NUM_LN = 607 / 128;
 var GAMMA_TABLE_LN = [0.99999999999999709182, 57.156235665862923517, -59.597960355475491248, 14.136097974741747174, -0.49191381609762019978, 0.33994649984811888699e-4, 0.46523628927048575665e-4, -0.98374475304879564677e-4, 0.15808870322491248884e-3, -0.21026444172410488319e-3, 0.21743961811521264320e-3, -0.16431810653676389022e-3, 0.84418223983852743293e-4, -0.26190838401581408670e-4, 0.36899182659531622704e-5];
 
 /**
- * See: [Log-Gamma Function](https://en.wikipedia.org/wiki/Gamma_function#The_log-gamma_function)
- *
  * The log-gamma function is a useful general function.
  * It can handle much larger numbers because it grows much slower compared to the gamma function.
  * It's (n - 1)! and is used by the gamma function for n > 100.
- *
- * Code kanged from: [gamma.js](https://github.com/substack/gamma.js/blob/master/index.js)
+ * [See](https://en.wikipedia.org/wiki/Gamma_function#The_log-gamma_function)
+ * @param {number} n - The number.
+ * @return {number} An approximation of ln(n-1)! or NaN if n < 0.
  */
+// Code kanged from: [gamma.js](https://github.com/substack/gamma.js/blob/master/index.js)
 function lngamma(z) {
   if (z < 0) return NaN;
   var x = GAMMA_TABLE_LN[0];
@@ -124,17 +119,12 @@ var GAMMA_NUM = 7;
 var GAMMA_TABLE = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
 
 /**
- * See: [Gamma Function](https://en.wikipedia.org/wiki/Gamma_function)
- *
  * The gamma function is a useful general function. It's (n - 1)!.
- *
- * #### Restrictions:
- * ```
- * gamma(-1) == Infinity
- * ```
- *
- * Code kanged from: [gamma.js](https://github.com/substack/gamma.js/blob/master/index.js)
+ * [See](https://en.wikipedia.org/wiki/Gamma_function)
+ * @param {number} n - The number.
+ * @return {number} An approximation of (n-1)! or Infinity if n is a negative integer.
  */
+// Code kanged from: [gamma.js](https://github.com/substack/gamma.js/blob/master/index.js)
 function gamma(n) {
   var z = n;
   if (z < 0 && z % 1 == 0) {
@@ -155,14 +145,15 @@ function gamma(n) {
 };
 
 /**
- * See: [Summation](https://en.wikipedia.org/wiki/Summation)
  *
  * Adds a list of elements together.
  * Uses the [Kahan summation algorithm](https://en.wikipedia.org/wiki/Kahan_summation_algorithm)
  * to compensate for floating-point error.
- *
- * Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/blob/master/src/sum.js)
+ * See: [Summation](https://en.wikipedia.org/wiki/Summation)
+ * @param {number} x - The numbers.
+ * @return {number} The sum or 0 if x is the empty set.
  */
+// Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/blob/master/src/sum.js)
 function sum(x) {
   if (x.length == 0) return 0;
   var errorComp = 0;
@@ -175,31 +166,27 @@ function sum(x) {
 };
 
 /**
- * See: [Mean](https://en.wikipedia.org/wiki/Mean)
- *
  * Averages a list of elements. Uses our internal sum function.
+ * See: [Mean](https://en.wikipedia.org/wiki/Mean)
+ * @param {number} x - The numbers to average.
+ * @return {number} The mean or NaN if x is the empty set.
  */
 function mean(x) {
   return x.length == 0 ? NaN : sum(x) / x.length;
 };
 
 /**
- * See: [Mode](https://en.wikipedia.org/wiki/Mode)
- *
  * Finds the most frequent values of a list of numbers.
  * It always returns an array.
  * The result may contain one or more values.
- *
- * #### Restrictions:
- * ```
- * mode( [] ) == NaN
- * mode( [1] ) == [1]
- * ```
+ * See: [Mode](https://en.wikipedia.org/wiki/Mode)
+ * @param {number} x - The numbers.
+ * @return {number} The mode or NaN if x is the empty set.
  */
-function mode(list) {
-  if (list.length == 0) return NaN;else if (list.length == 1) return list;else {
+function mode(x) {
+  if (x.length == 0) return NaN;else if (x.length == 1) return x;else {
     var _ret = function () {
-      var histo = list.reduce(function (obj, val) {
+      var histo = x.reduce(function (obj, val) {
         if (obj[val]) obj[val]++;else obj[val] = 1;
         return obj;
       }, {});
@@ -226,19 +213,17 @@ var LIST_LIMIT = 600;
 var LIST_SCALE = .5;
 
 /**
- * See: [Selection](https://en.wikipedia.org/wiki/Selection_algorithm)
- *
  * Efficiently finds the kth largest element in a array.
- *
- * #### Restrictions:
- * ```
- * select( null, 1 ) == NaN     // Error
- * ```
- *
- * Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/pull/146/files)
+ * See: [Selection](https://en.wikipedia.org/wiki/Selection_algorithm)
+ * @param {number} x - The numbers.
+ * @param {number} k - The element to select.
+ * @param {number} [begin] - The starting index.
+ * @param {number} [end] - The ending index.
+ * @return {number} The kth largest element or NaN if x is the empty set.
  */
-function select(array, k, begin, end) {
-  var list = array.slice(0);
+// Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/pull/146/files)
+function select(x, k, begin, end) {
+  var list = x.slice(0);
   if (list.length == 0 || k >= list.length) return NaN;
   var left = begin || 0;
   var right = end || list.length - 1;
@@ -291,17 +276,13 @@ function swap(list, i, j) {
 }
 
 /**
- * See: [Median](https://en.wikipedia.org/wiki/Median)
- *
  * Finds the central most value for a list of numbers.
  * If the list is even, and has no single center, the two
  * inner-most values are averaged.
  * Uses our internal selection function.
- *
- * #### Restrictions:
- * ```
- * median( [] ) == NaN
- * ```
+ * See: [Median](https://en.wikipedia.org/wiki/Median)
+ * @param {number} x - The numbers.
+ * @return {number} The median or NaN if x is the empty set.
  */
 function median(list) {
   var result = void 0;
@@ -319,75 +300,60 @@ function median(list) {
 }
 
 /**
- * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
- *
  * Finds the element of a list of numbers at a certain percentile ordered smallest to largest.
- *
- * #### Restrictions:
- * ```
- * percentile( null, .5 )     // Error
- * percentile( [1,2,3], p<0 ) // Error
- * percentile( [1,2,3], p>1 ) // Error
- * percentile( [], .5 )       // NaN
- * ```
+ * Uses the internal select function.
+ * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
+ * @param {number} x - The numbers.
+ * @return {number} The element at the xth percentile or NaN if x is the empty set.
  */
-function percentile(list, p) {
-  if (p == undefined || p > 1 || p < 0) throw new Error('p must be between zero and one inclusive.');else if (list == undefined) throw new Error('need a list to provide a percentile.');else if (list.length == 0) return NaN;else {
-    var index = Math.floor(list.length * p);
-    if (index >= list.length) index = list.length - 1;
-    return select(list, index);
+function percentile(x, p) {
+  if (p == undefined || p > 1 || p < 0) throw new Error('p must be between zero and one inclusive.');else if (x == undefined) throw new Error('need a list to provide a percentile.');else if (x.length == 0) return NaN;else {
+    var index = Math.floor(x.length * p);
+    if (index >= list.length) index = x.length - 1;
+    return select(x, index);
   };
 };
 
 /**
- * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
- *
  * Finds the nth largest element of a list of numbers.
  * Accepts both a single quantile and an array of quantiles.
- *
- * #### Restrictions:
- * ```
- * quantile( null, 1 )      // Error
- * quantile( [], 1 )        // Error
- * quantile( [1,2,3], p<0 ) // Error
- * quantile( [1,2,3], p>1 ) // Error
- * ```
+ * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
+ * @param {number} x - The numbers.
+ * @param {Array<number>} quantiles - A list of quantiles to compute.
+ * @return {number} The computed quantiles respective to quantiles provided or NaN if x is the empty set.
  */
-function quantile(list) {
-  if (list == undefined || list.length == 0) throw new Error('you must provide an array.');
-
-  for (var _len = arguments.length, quantiles = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    quantiles[_key - 1] = arguments[_key];
-  }
-
+function quantile(x, quantiles) {
+  if (x == undefined || x.length == 0) throw new Error('you must provide an array.');
   var validQuants = quantiles.reduce(function (p, n) {
     return n >= 0 && n <= 1 && p;
   }, true);
   if (!validQuants) throw new Error('quantiles must be between zero and one inclusive.');
   if (quantiles.length > 1) return quantiles.map(function (q) {
-    return quantile(list, q);
+    return quantile(x, q);
   });else {
     var quant = quantiles[0];
-    if (quant == 0) return list[0];else if (quant == 1) return list[list.length - 1];else {
-      var index = list.length * quant;
+    if (quant == 0) return x[0];else if (quant == 1) return x[x.length - 1];else {
+      var index = x.length * quant;
       if (index % 1) {
-        return select(list, Math.floor(index));
-      } else if (list.length % 2) {
-        return select(list, index);
+        return select(x, Math.floor(index));
+      } else if (x.length % 2) {
+        return select(x, index);
       } else {
-        return (select(list, index - 1) + select(list, index)) / 2;
+        return (select(x, index - 1) + select(x, index)) / 2;
       };
     };
   };
 };
 
 /**
- * See: [Range](https://en.wikipedia.org/wiki/Range_(statistics))
- *
  * Finds the difference between the largest and smallest values.
+ * See: [Range](https://en.wikipedia.org/wiki/Range_(statistics))
+ * @param {number} x - The numbers.
+ * @return {number} The range or NaN if x is the empty set.
  */
-function range(list) {
-  return Math.max.apply(Math, babelHelpers.toConsumableArray(list)) - Math.min.apply(Math, babelHelpers.toConsumableArray(list));
+function range(x) {
+  if (x.length == 0) return NaN;
+  return Math.max.apply(Math, babelHelpers.toConsumableArray(x)) - Math.min.apply(Math, babelHelpers.toConsumableArray(x));
 }
 
 /**
@@ -395,9 +361,12 @@ function range(list) {
  * the difference of each observation and the mean of the set raised to the nth power.
  * Can be used to find the absolute value of the difference for functions like MeanDeviation,
  * or by default, the signed values for functions like Variance and SquaredMeanDeviation.
- *
- * Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/blob/master/src/sum_nth_power_deviations.js)
+ * @param {number} x - The numbers.
+ * @param {number} n - The number to raise to.
+ * @param {boolean} [absolute=false] - Use absolute value of difference.
+ * @return {number} The sum of (x-mu)^n or NaN if x is the empty set.
  */
+// Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/blob/master/src/sum_nth_power_deviations.js)
 function sumNthPowerDev(x, n, absolute) {
   if (x.length == 0) return NaN;else {
     var _ret = function () {
@@ -416,18 +385,20 @@ function sumNthPowerDev(x, n, absolute) {
 };
 
 /**
- * See: [Variance](https://en.wikipedia.org/wiki/Variance)
- *
 * A measure that is used to quantify the amount of variation of a set of data values from their mean value.
+* See: [Variance](https://en.wikipedia.org/wiki/Variance)
+* @param {number} x - The numbers.
+* @return {number} The variance or NaN if x is the empty set.
 */
 function variance(x) {
   return x.length == 0 ? NaN : sumNthPowerDev(x, 2) / x.length;
 };
 
 /**
- * See: [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation)
- *
  * A measure that is used to quantify the amount of variation of a set of data values.
+ * See: [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation)
+ * @param {number} x - The numbers.
+ * @return {number} The standard deviation or 0 if x is the empty set.
  */
 function std(x) {
   var v = variance(x);
@@ -435,18 +406,22 @@ function std(x) {
 };
 
 /**
- * See: [Stirling's Approximation](https://en.wikipedia.org/wiki/Stirling%27s_approximation)
- *
  * Efficiently appoximates ln(n!). Similar to the gamma function, but can be faster and more accurate.
+ * See: [Stirling's Approximation](https://en.wikipedia.org/wiki/Stirling%27s_approximation)
+ * @param {number} n - The number.
+ * @return {number} An approximation on ln(n!).
  */
 function stirling(n) {
   return (n + .5) * Math.log(n) - n + Math.log(2 * Math.PI) / 2;
 };
 
 /**
- * See: [Standard Score](https://en.wikipedia.org/wiki/Standard_score)
- *
  * The signed number of deviations an observed value is above the mean.
+ * See: [Standard Score](https://en.wikipedia.org/wiki/Standard_score)
+ * @param {number} x - The number.
+ * @param {number} mu - The mean.
+ * @param {number} std - The standard deviation.
+ * @return {number} The zscore.
  */
 function zscore(x, mu, std) {
   return (x - mu) / std;
@@ -796,30 +771,75 @@ var StudentsTDistribution = function () {
 
 StudentsTDistribution.covariates = 1;
 
+/**
+* The sample class is the base for all of our sample based calculations.
+* These methods can be directly accessed on the class or renerated via
+* a class instance. You'll need a Sample object for tTest.
+*/
+
 var Sample = function () {
   babelHelpers.createClass(Sample, null, [{
     key: 'variance',
+
+    /**
+     * Get the sample variance.
+     * [See](https://en.wikipedia.org/wiki/Variance#Population_variance_and_sample_variance).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The sample variance or NaN.
+     */
     value: function variance(x) {
       return sumNthPowerDev(x, 2) / (x.length - 1);
     }
   }, {
     key: 'sqrdMeanDev',
+
+
+    /**
+     * Get the sum of the squared deviations from the mean.
+     * [See](https://en.wikipedia.org/wiki/Squared_deviations_from_the_mean).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The squared deviations from the mean or NaN.
+     */
     value: function sqrdMeanDev(x) {
       return sumNthPowerDev(x, 2);
     }
   }, {
     key: 'meanDev',
+
+
+    /**
+     * Get the sum of the absolute deviations from the mean.
+     * [See](https://en.wikipedia.org/wiki/Deviation_(statistics)#Unsigned_or_absolute_deviation).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The mean deviation.
+     */
     value: function meanDev(x) {
       return sumNthPowerDev(x, 1, true) / x.length;
     }
   }, {
     key: 'stdDev',
+
+
+    /**
+     * Get the standard deviation.
+     * [See](https://en.wikipedia.org/wiki/Standard_deviation).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The standard deviation.
+     */
     value: function stdDev(x) {
       var v = this.variance(x);
       return isNaN(v) ? 0 : Math.sqrt(v);
     }
   }, {
     key: 'rootMeanSqrd',
+
+
+    /**
+     * Get the root mean square.
+     * [See](https://en.wikipedia.org/wiki/Root_mean_square).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The root mean square.
+     */
     value: function rootMeanSqrd(x) {
       return Math.sqrt(x.map(function (val) {
         return val * val;
@@ -829,21 +849,54 @@ var Sample = function () {
     }
   }, {
     key: 'stdMeanDev',
+
+
+    /**
+     * Get the standard deviation of the mean.
+     * [See](https://en.wikipedia.org/wiki/Standard_error#Standard_error_of_the_mean).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The standard deviation of the mean.
+     */
     value: function stdMeanDev(x) {
       return this.stdDev(x) / Math.sqrt(x.length);
     }
   }, {
     key: 'relativeStdDev',
+
+
+    /**
+     * Get the relative standard deviation or coefficient of variation.
+     * [See](https://en.wikipedia.org/wiki/Coefficient_of_variation).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The standard deviation of the mean.
+     */
     value: function relativeStdDev(x) {
       return this.stdDev(x) / mean(x);
     }
   }, {
     key: 'quartiles',
+
+
+    /**
+     * Get the .25, .5, .75 quantiles of the data.
+     * The .5 quantile is the median. Together they are the quartiles.
+     * [See](https://en.wikipedia.org/wiki/Quartile).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The standard deviation of the mean.
+     */
     value: function quartiles(x) {
-      return quantile(x, .25, .5, .75);
+      return quantile(x, [.25, .5, .75]);
     }
   }, {
     key: 'skewness',
+
+
+    /**
+     * Get the skewness.
+     * [See](https://en.wikipedia.org/wiki/Skewness).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The skewness.
+     */
     value: function skewness(x) {
       var std = this.stdDev(x);
       if (isNaN(std) || x.length < 3) return NaN;else {
@@ -855,6 +908,14 @@ var Sample = function () {
     }
   }, {
     key: 'kurtosis',
+
+
+    /**
+     * Get the kurtosis.
+     * [See](https://en.wikipedia.org/wiki/Kurtosis).
+     * @param {Array<number>} x - The sample data.
+     * @return {number} The kurtosis.
+     */
     value: function kurtosis(x) {
       var std = this.stdDev(x);
       if (isNaN(std) || x.length < 3) return NaN;else {
@@ -866,6 +927,15 @@ var Sample = function () {
     }
   }, {
     key: 'covariance',
+
+
+    /**
+     * Get the covariance.
+     * [See](https://en.wikipedia.org/wiki/Covariance).
+     * @param {Sample} x -A Sample object.
+     * @param {Sample} y -A Sample object.
+     * @return {number} The covariance.
+     */
     value: function covariance(x, y) {
       if (!x || !y || x.size <= 1 || x.size !== y.size) return NaN;else {
         var _sum = x.data.map(function (_, i) {
@@ -878,6 +948,15 @@ var Sample = function () {
     }
   }, {
     key: 'correlation',
+
+
+    /**
+     * Get the correlation.
+     * [See](https://en.wikipedia.org/wiki/Correlation_and_dependence).
+     * @param {Sample} x -A Sample object.
+     * @param {Sample} y -A Sample object.
+     * @return {number} The correlation.
+     */
     value: function correlation(x, y) {
       if (!x || !x.std || !y || !y.std) return NaN;
       var cov = this.covariance(x, y);
@@ -885,7 +964,13 @@ var Sample = function () {
     }
   }]);
 
-  function Sample(data) {
+
+  /**
+   * Generate a new Sample object.
+   * @param {Array<number>} x - The sample data.
+   */
+
+  function Sample(x) {
     var _this = this;
 
     babelHelpers.classCallCheck(this, Sample);
@@ -898,23 +983,51 @@ var Sample = function () {
       return _this.constructor.correlation(_this, y);
     };
 
-    if (data.length == 0) throw new Error('Sample of size 0 not allowed.');
-    this.data = data;
-    this.size = data.length;
-    this.mean = mean(data);
-    this.std = this.constructor.stdDev(data);
-    this.variance = this.constructor.variance(data);
-    this.skewness = this.constructor.skewness(data);
-    this.kurtosis = this.constructor.kurtosis(data);
-    this.sqrdMeanDev = this.constructor.sqrdMeanDev(data);
-    this.meanDev = this.constructor.meanDev(data);
-    this.rootMeanSqrd = this.constructor.rootMeanSqrd(data);
-    this.stdMeanDev = this.constructor.stdMeanDev(data);
-    this.relStdDev = this.constructor.relativeStdDev(data);
-    this.quartiles = this.constructor.quartiles(data);
+    if (x.length == 0) throw new Error('Sample of size 0 not allowed.');
+    this.data = x;
+    this.size = x.length;
+    this.mean = mean(x);
+    this.std = this.constructor.stdDev(x);
+    this.variance = this.constructor.variance(x);
+    this.skewness = this.constructor.skewness(x);
+    this.kurtosis = this.constructor.kurtosis(x);
+    this.sqrdMeanDev = this.constructor.sqrdMeanDev(x);
+    this.meanDev = this.constructor.meanDev(x);
+    this.rootMeanSqrd = this.constructor.rootMeanSqrd(x);
+    this.stdMeanDev = this.constructor.stdMeanDev(x);
+    this.relStdDev = this.constructor.relativeStdDev(x);
+    this.quartiles = this.constructor.quartiles(x);
   }
+
+  /**
+   * Get the correlation.
+   * [See](https://en.wikipedia.org/wiki/Correlation_and_dependence).
+   * @memberof Sample
+   * @instance
+   * @param {Sample} y - A Sample object.
+   * @return {number} The correlation.
+   */
+
+  /**
+   * Get the correlation.
+   * [See](https://en.wikipedia.org/wiki/Correlation_and_dependence).
+   * @memberof Sample
+   * @instance
+   * @param {Sample} y - A Sample object.
+   * @return {number} The correlation.
+   */
+
 
   return Sample;
 }();
 
-export { choose, factorial, gamma, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, BinomialDistribution as Binomial, BernoulliDistribution as Bernoulli, StudentsTDistribution as StudentsT, Sample, tTest };
+function tTest(sample, other, x) {
+  if (!sample) return NaN;
+  if (!other) return (sample.mean - x) / (sample.std / Math.sqrt(sample.size));else {
+    var difference = x || 0;
+    var weightedVar = ((sample.size - 1) * sample.variance + (other.size - 1) * other.variance) / (sample.size + other.size - 2);
+    return (sample.mean - other.mean - difference) / Math.sqrt(weightedVar * (1 / sample.size + 1 / other.size));
+  }
+}
+
+export { choose, factorial, gamma, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, BinomialDistribution as Binomial, BernoulliDistribution as Bernoulli, StudentsTDistribution as StudentsT, Sample, tTest as ttest };

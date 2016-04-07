@@ -22,7 +22,7 @@
     "blue-tape": "^0.2.0",
     "documentation": "^4.0.0-beta2",
     "faucet": "0.0.1",
-    "istanbul": "^0.4.2",
+    "istanbul": "^1.0.0-alpha.2",
     "rollup": "^0.25.7",
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-uglify": "^0.3.1",
