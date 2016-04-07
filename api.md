@@ -1,3 +1,355 @@
+# Bernoulli
+
+**Extends Binomial**
+
+The Binomial Distribution is a discrete probability distribution
+with parameters n = _number of trials_ and p = _probability of success_.
+See: [Bernoulli Distribution](https://en.wikipedia.org/wiki/Bernoulli_distribution)
+
+## cdf
+
+Calculate the probability of k or less in B(1, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability getting a value of k or less from B(1,p).
+
+## constructor
+
+Generate a new Bernoulli object.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+
+Returns **** 
+
+## pdf
+
+Calculate the probability of exaclty k in B(1, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of k happening in B(1,p).
+
+## random
+
+Generate a random value from B(1, p).
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from B(1,p).
+
+## sample
+
+Generate an array of k random values from B(1, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from B(1,p).
+
+## cdf
+
+Calculate the probability of k or less in B(1, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability getting a value of k or less from B(1,p).
+
+## pmf
+
+Calculate the probability of exaclty k in B(1, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of k happening in B(1,p).
+
+## random
+
+Generate a random value from B(1, p).
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from B(1,p).
+
+# Binomial
+
+The Binomial Distribution is a discrete probability distribution
+with parameters n = _number of trials_ and p = _probability of success_.
+See: [Binomial Distribution](https://en.wikipedia.org/wiki/Binomial_distribution)
+
+## cdf
+
+Calculate the probability of k or less in B(n, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability getting a value of k or less from B(n,p).
+
+## constructor
+
+Generate a new Binomial object.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **** 
+
+## pdf
+
+Calculate the probability of exaclty k in B(n, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of k happening in B(n,p).
+
+## random
+
+Generate a random value from B(n, p).
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from B(n,p).
+
+## sample
+
+Generate an array of k random values from B(n, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from B(n,p).
+
+## cdf
+
+Calculate the probability of k or less in B(n, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability getting a value of k or less from B(n,p).
+
+## kurtosis
+
+Get the kurtosis.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The kurtosis of B(n,p).
+
+## mean
+
+Get the mean.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mean of B(n,p).
+
+## pmf
+
+Calculate the probability of exaclty k in B(n, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of k happening in B(n,p).
+
+## random
+
+Generate a random value from B(n, p).
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from B(n,p).
+
+## relativeStdDev
+
+Get the relative standard deviation.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The relative standard deviation of B(n,p).
+
+## sample
+
+Generate an array of k random values from B(n, p).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from B(n,p).
+
+## skewness
+
+Get the skewness.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The skewness of B(n,p).
+
+## stdDev
+
+Get the standard deviation.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation of B(n,p).
+
+## variance
+
+Get the variance.
+
+**Parameters**
+
+-   `p` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of success.
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** number of trials.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The variance of B(n,p).
+
+# Normal
+
+The Binomial Distribution is a discrete probability distribution
+with parameters n = _number of trials_ and p = _probability of success_.
+See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
+
+## cdf
+
+Calculate the probability of getting x or less from N(mu, sigma).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from N(mu, sigma).
+
+## constructor
+
+Generate a new Normal object.
+
+**Parameters**
+
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mean.
+-   `sigma` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation.
+
+Returns **** 
+
+## pdf
+
+Calculate the probability of exaclty x in N(mu, sigma).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in N(mu, sigma).
+
+## random
+
+Generate a random value from N(mu, sigma).
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from N(mu, sigma).
+
+## sample
+
+Generate an array of k random values from N(mu, sigma).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from N(mu, sigma).
+
+## cdf
+
+Calculate the probability of getting x or less from N(mu, sigma).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mean.
+-   `sigma` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from N(mu, sigma).
+
+## pdf
+
+Calculate the probability of exaclty x in N(mu, sigma).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mean.
+-   `sigma` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in N(mu, sigma).
+
+## random
+
+Generate a random value from N(mu, sigma).
+
+**Parameters**
+
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mean.
+-   `sigma` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from N(mu, sigma).
+
+## sample
+
+Generate an array of k random values from N(mu, sigma).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mean.
+-   `sigma` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from N(mu, sigma).
+
 # choose
 
 Choose k elements from a set of n elements.
@@ -14,7 +366,7 @@ Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refer
 
 The sample class is the base for all of our sample based calculations.
 These methods can be directly accessed on the class or renerated via
-a class instance. You'll need a Sample object for tTest.
+a class instance. You'll need a Sample object for the ttest function.
 
 ## constructor
 
@@ -39,14 +391,14 @@ Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refer
 
 ## covariance
 
-Get the correlation.
-[See](https://en.wikipedia.org/wiki/Correlation_and_dependence).
+Get the covariance.
+[See](https://en.wikipedia.org/wiki/Covariance).
 
 **Parameters**
 
 -   `y` **Sample** A Sample object.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The correlation.
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The covariance.
 
 ## correlation
 
@@ -104,7 +456,7 @@ The .5 quantile is the median. Together they are the quartiles.
 
 -   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The sample data.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation of the mean.
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The quartiles.
 
 ## relativeStdDev
 
@@ -115,7 +467,7 @@ Get the relative standard deviation or coefficient of variation.
 
 -   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The sample data.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation of the mean.
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The relative standard deviation.
 
 ## rootMeanSqrd
 
@@ -183,6 +535,19 @@ Get the sample variance.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The sample variance or NaN.
 
+# error
+
+A useful function. Gets used in the Normal distribution cdf.
+It's the probability of a random variable with
+normal distribution of mean 0 and variance 1/2 falling in the range [-x, x].
+See: [Error](https://en.wikipedia.org/wiki/Error_function#)
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers to average.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The error value.
+
 # factorial
 
 n! is the product of all positive integers less than or equal to n.
@@ -225,7 +590,7 @@ See: [Mean](https://en.wikipedia.org/wiki/Mean)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers to average.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers to average.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mean or NaN if x is the empty set.
 
@@ -239,7 +604,7 @@ See: [Median](https://en.wikipedia.org/wiki/Median)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The median or NaN if x is the empty set.
 
@@ -252,7 +617,7 @@ See: [Mode](https://en.wikipedia.org/wiki/Mode)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The mode or NaN if x is the empty set.
 
@@ -264,7 +629,7 @@ See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The element at the xth percentile or NaN if x is the empty set.
 
@@ -276,7 +641,7 @@ See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 -   `quantiles` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A list of quantiles to compute.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The computed quantiles respective to quantiles provided or NaN if x is the empty set.
@@ -288,7 +653,7 @@ See: [Range](https://en.wikipedia.org/wiki/Range_(statistics))
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The range or NaN if x is the empty set.
 
@@ -299,7 +664,7 @@ See: [Selection](https://en.wikipedia.org/wiki/Selection_algorithm)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 -   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The element to select.
 -   `begin` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)=** The starting index.
 -   `end` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)=** The ending index.
@@ -313,7 +678,7 @@ See: [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation or 0 if x is the empty set.
 
@@ -337,7 +702,7 @@ See: [Summation](https://en.wikipedia.org/wiki/Summation)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The sum or 0 if x is the empty set.
 
@@ -350,11 +715,26 @@ or by default, the signed values for functions like Variance and SquaredMeanDevi
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 -   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number to raise to.
 -   `absolute` **[boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)=** Use absolute value of difference. (optional, default `false`)
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The sum of (x-mu)^n or NaN if x is the empty set.
+
+# ttest
+
+Computes Student's T-Test for the provided samples.
+If only one sample is provided, a one-sample t-test is computed on the sample mean vs x.
+If two samples are provided, a two-sample t-test is computed on the difference between the sample means and x.
+See: [Student's T-Test](https://en.wikipedia.org/wiki/Student%27s_t-test)
+
+**Parameters**
+
+-   `sample` **Sample** The sample to test
+-   `other` **Sample=** An optional sample to compare with a two sample test.
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)=** The mean or difference to test. (optional, default `0`)
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The t-statistic or NaN if the sample is the empty set.
 
 # variance
 
@@ -363,7 +743,7 @@ See: [Variance](https://en.wikipedia.org/wiki/Variance)
 
 **Parameters**
 
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The numbers.
+-   `x` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The numbers.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The variance or NaN if x is the empty set.
 

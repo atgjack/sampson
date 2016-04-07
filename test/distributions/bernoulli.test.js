@@ -36,6 +36,26 @@ test('distributions/bernoulli', (t) => {
     t.end();
   });
 
+  t.test('distributions/bernoulli/cdf', t => {
+    let cdf = Bernoulli.cdf;
+
+    t.test('throws on bad params', t => {
+      t.throws( () => cdf(1, 1.5) );
+      t.throws( () => cdf(1, -.5) );
+      t.throws( () => cdf(1, 'test') );
+      t.throws( () => cdf('test', .5) );
+      t.end()
+    });
+
+    t.test('generates accurate values', t => {
+      t.ok( isNaN(cdf(-1, .5)) );
+      t.ok( isNaN(cdf(1001, .5)) );
+      t.equal( cdf(0, .25), .75 );
+      t.equal( cdf(1, .25), .25 );
+      t.equal( round(cdf(0, .665)), .335 );
+      t.end()
+    });
+  });
   t.test('validates and generates the class', t => {
 
     // Make sure it throws on missing args.
@@ -57,6 +77,8 @@ test('distributions/bernoulli', (t) => {
     t.equal( Math.round(dist.sample(1000).reduce( (p,n) => p+n ) / 100) / 10, dist.mu );
     t.equal( dist.pdf(1), p );
     t.equal( dist.pdf(0), 1 - p );
+    t.equal( dist.pdf(1), p );
+    t.equal( dist.cdf(0), 1 - p );
     t.end();
   })
 });

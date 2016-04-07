@@ -29,6 +29,31 @@ babelHelpers.createClass = function () {
   };
 }();
 
+babelHelpers.get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
 babelHelpers.inherits = function (subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
     throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
@@ -82,6 +107,21 @@ function choose(n, k) {
     }
     return r;
   };
+};
+
+/**
+ * A useful function. Gets used in the Normal distribution cdf.
+ * It's the probability of a random variable with
+ * normal distribution of mean 0 and variance 1/2 falling in the range [-x, x].
+ * See: [Error](https://en.wikipedia.org/wiki/Error_function#)
+ * @param {number} x - The numbers to average.
+ * @return {number} The error value.
+ */
+// Kanged from: https://en.wikipedia.org/wiki/Error_function#Numerical_approximation
+function error(x) {
+  var t = 1 / (1 + .5 * Math.abs(x));
+  var tau = t * Math.exp(-(x * x) - 1.26551223 + 1.00002368 * t + 0.37409196 * Math.pow(t, 2) + 0.09678418 * Math.pow(t, 3) - 0.18628806 * Math.pow(t, 4) + 0.27886807 * Math.pow(t, 5) - 1.13520398 * Math.pow(t, 6) + 1.48851587 * Math.pow(t, 7) - 0.82215223 * Math.pow(t, 8) + 0.17087277 * Math.pow(t, 9));
+  return x >= 0 ? 1 - tau : tau - 1;
 };
 
 /**
@@ -150,7 +190,7 @@ function gamma(n) {
  * Uses the [Kahan summation algorithm](https://en.wikipedia.org/wiki/Kahan_summation_algorithm)
  * to compensate for floating-point error.
  * See: [Summation](https://en.wikipedia.org/wiki/Summation)
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @return {number} The sum or 0 if x is the empty set.
  */
 // Code kanged from: [simple-statistics](https://github.com/simple-statistics/simple-statistics/blob/master/src/sum.js)
@@ -168,7 +208,7 @@ function sum(x) {
 /**
  * Averages a list of elements. Uses our internal sum function.
  * See: [Mean](https://en.wikipedia.org/wiki/Mean)
- * @param {number} x - The numbers to average.
+ * @param {Array<number>} x - The numbers to average.
  * @return {number} The mean or NaN if x is the empty set.
  */
 function mean(x) {
@@ -180,7 +220,7 @@ function mean(x) {
  * It always returns an array.
  * The result may contain one or more values.
  * See: [Mode](https://en.wikipedia.org/wiki/Mode)
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @return {number} The mode or NaN if x is the empty set.
  */
 function mode(x) {
@@ -215,7 +255,7 @@ var LIST_SCALE = .5;
 /**
  * Efficiently finds the kth largest element in a array.
  * See: [Selection](https://en.wikipedia.org/wiki/Selection_algorithm)
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @param {number} k - The element to select.
  * @param {number} [begin] - The starting index.
  * @param {number} [end] - The ending index.
@@ -281,7 +321,7 @@ function swap(list, i, j) {
  * inner-most values are averaged.
  * Uses our internal selection function.
  * See: [Median](https://en.wikipedia.org/wiki/Median)
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @return {number} The median or NaN if x is the empty set.
  */
 function median(list) {
@@ -303,13 +343,13 @@ function median(list) {
  * Finds the element of a list of numbers at a certain percentile ordered smallest to largest.
  * Uses the internal select function.
  * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @return {number} The element at the xth percentile or NaN if x is the empty set.
  */
 function percentile(x, p) {
   if (p == undefined || p > 1 || p < 0) throw new Error('p must be between zero and one inclusive.');else if (x == undefined) throw new Error('need a list to provide a percentile.');else if (x.length == 0) return NaN;else {
     var index = Math.floor(x.length * p);
-    if (index >= list.length) index = x.length - 1;
+    if (index >= x.length) index = x.length - 1;
     return select(x, index);
   };
 };
@@ -318,18 +358,19 @@ function percentile(x, p) {
  * Finds the nth largest element of a list of numbers.
  * Accepts both a single quantile and an array of quantiles.
  * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @param {Array<number>} quantiles - A list of quantiles to compute.
  * @return {number} The computed quantiles respective to quantiles provided or NaN if x is the empty set.
  */
 function quantile(x, quantiles) {
-  if (x == undefined || x.length == 0) throw new Error('you must provide an array.');
+  if (!Array.isArray(x) || x.length == 0) throw new Error('you must provide an array.');
+  if (!Array.isArray(quantiles) || quantiles.length == 0) throw new Error('you must provide some quantiles.');
   var validQuants = quantiles.reduce(function (p, n) {
     return n >= 0 && n <= 1 && p;
   }, true);
   if (!validQuants) throw new Error('quantiles must be between zero and one inclusive.');
   if (quantiles.length > 1) return quantiles.map(function (q) {
-    return quantile(x, q);
+    return quantile(x, [q]);
   });else {
     var quant = quantiles[0];
     if (quant == 0) return x[0];else if (quant == 1) return x[x.length - 1];else {
@@ -348,7 +389,7 @@ function quantile(x, quantiles) {
 /**
  * Finds the difference between the largest and smallest values.
  * See: [Range](https://en.wikipedia.org/wiki/Range_(statistics))
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @return {number} The range or NaN if x is the empty set.
  */
 function range(x) {
@@ -361,7 +402,7 @@ function range(x) {
  * the difference of each observation and the mean of the set raised to the nth power.
  * Can be used to find the absolute value of the difference for functions like MeanDeviation,
  * or by default, the signed values for functions like Variance and SquaredMeanDeviation.
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @param {number} n - The number to raise to.
  * @param {boolean} [absolute=false] - Use absolute value of difference.
  * @return {number} The sum of (x-mu)^n or NaN if x is the empty set.
@@ -387,7 +428,7 @@ function sumNthPowerDev(x, n, absolute) {
 /**
 * A measure that is used to quantify the amount of variation of a set of data values from their mean value.
 * See: [Variance](https://en.wikipedia.org/wiki/Variance)
-* @param {number} x - The numbers.
+* @param {Array<number>} x - The numbers.
 * @return {number} The variance or NaN if x is the empty set.
 */
 function variance(x) {
@@ -397,7 +438,7 @@ function variance(x) {
 /**
  * A measure that is used to quantify the amount of variation of a set of data values.
  * See: [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation)
- * @param {number} x - The numbers.
+ * @param {Array<number>} x - The numbers.
  * @return {number} The standard deviation or 0 if x is the empty set.
  */
 function std(x) {
@@ -427,59 +468,304 @@ function zscore(x, mu, std) {
   return (x - mu) / std;
 };
 
+var Distribution = function () {
+  babelHelpers.createClass(Distribution, null, [{
+    key: "random",
+    value: function random() {
+      return Math.random();
+    }
+  }]);
+
+  function Distribution() {
+    babelHelpers.classCallCheck(this, Distribution);
+  }
+
+  return Distribution;
+}();
+
+Distribution.covariates = 0;
+Distribution.discrete = false;
+
+var last = NaN;
+
+/**
+* The Binomial Distribution is a discrete probability distribution
+* with parameters n = *number of trials* and p = *probability of success*.
+* See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
+*/
+
+var Normal = function (_Distribution) {
+  babelHelpers.inherits(Normal, _Distribution);
+  babelHelpers.createClass(Normal, null, [{
+    key: 'random',
+
+
+    /**
+     * Generate a random value from N(mu, sigma).
+     * @param {number} mu - The mean.
+     * @param {number} sigma - The standard deviation.
+     * @return {number} The random value from N(mu, sigma).
+     */
+    value: function random(mu, sigma) {
+      if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
+      var z = last;
+      last = NaN;
+      if (!z) {
+        var a = babelHelpers.get(Object.getPrototypeOf(Normal), 'random', this).call(this) * 2 * Math.PI;
+        var b = Math.sqrt(-2.0 * Math.log(1.0 - babelHelpers.get(Object.getPrototypeOf(Normal), 'random', this).call(this)));
+        z = Math.cos(a) * b;
+        last = Math.sin(a) * b;
+      }
+      return mu + z * sigma;
+    }
+  }, {
+    key: 'sample',
+
+
+    /**
+     * Generate an array of k random values from N(mu, sigma).
+     * @param {number} k - The number of values to generate.
+     * @param {number} mu - The mean.
+     * @param {number} sigma - The standard deviation.
+     * @return {Array<number>} An array of random values from N(mu, sigma).
+     */
+    value: function sample(k, mu, sigma) {
+      var _this2 = this;
+
+      return Array.apply(null, Array(k)).map(function () {
+        return _this2.random(mu, sigma);
+      });
+    }
+  }, {
+    key: 'pdf',
+
+
+    /**
+     * Calculate the probability of exaclty x in N(mu, sigma).
+     * @param {number} x - The value to predict.
+     * @param {number} mu - The mean.
+     * @param {number} sigma - The standard deviation.
+     * @return {number} The probability of x happening in N(mu, sigma).
+     */
+    value: function pdf(x, mu, sigma) {
+      if (typeof x != 'number') throw new Error('x must be a number.');
+      if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
+      var u = x / Math.abs(sigma);
+      return 1 / (Math.sqrt(2 * Math.PI) * Math.abs(sigma)) * Math.exp(-1 * Math.pow(x - mu, 2) / (2 * sigma * sigma));
+    }
+  }, {
+    key: 'cdf',
+
+
+    /**
+     * Calculate the probability of getting x or less from N(mu, sigma).
+     * @param {number} x - The value to predict.
+     * @param {number} mu - The mean.
+     * @param {number} sigma - The standard deviation.
+     * @return {number} The probability of getting x or less from N(mu, sigma).
+     */
+    value: function cdf(x, mu, sigma) {
+      if (typeof x != 'number') throw new Error('x must be a number.');
+      if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
+      return .5 * (1 + error((x - mu) / (sigma * Math.sqrt(2))));
+    }
+  }]);
+
+
+  /**
+   * Generate a new Normal object.
+   * @param {number} mu - The mean.
+   * @param {number} sigma - The standard deviation.
+   */
+
+  function Normal(mu, sigma) {
+    babelHelpers.classCallCheck(this, Normal);
+
+    if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Normal).call(this));
+
+    _this.pdf = function (x) {
+      return _this.constructor.pdf(x, _this.mu, _this.sigma);
+    };
+
+    _this.cdf = function (x) {
+      return _this.constructor.cdf(x, _this.mu, _this.sigma);
+    };
+
+    _this.random = function () {
+      return _this.constructor.random(_this.mu, _this.sigma);
+    };
+
+    _this.sample = function (n) {
+      return _this.constructor.sample(n, _this.mu, _this.sigma);
+    };
+
+    _this.mu = mu;
+    _this.sigma = sigma;
+    _this.variance = sigma * sigma;
+    return _this;
+  }
+
+  /**
+   * Calculate the probability of exaclty x in N(mu, sigma).
+   * @memberof Normal
+   * @instance
+   * @param {number} x - The value to predict.
+   * @return {number} The probability of x happening in N(mu, sigma).
+   */
+
+
+  /**
+   * Calculate the probability of getting x or less from N(mu, sigma).
+   * @memberof Normal
+   * @instance
+   * @param {number} x - The value to predict.
+   * @return {number} The probability of getting x or less from N(mu, sigma).
+   */
+
+
+  /**
+   * Generate a random value from N(mu, sigma).
+   * @memberof Normal
+   * @instance
+   * @return {number} The random value from N(mu, sigma).
+   */
+
+
+  /**
+   * Generate an array of k random values from N(mu, sigma).
+   * @param {number} k - The number of values to generate.
+   * @memberof Normal
+   * @instance
+   * @return {Array<number>} An array of random values from N(mu, sigma).
+   */
+
+
+  return Normal;
+}(Distribution);
+
+Normal.covariates = 2;
+Normal.discrete = false;
+
 var SMALL_MEAN = 14;
 
-var BinomialDistribution = function () {
-  babelHelpers.createClass(BinomialDistribution, null, [{
+/**
+* The Binomial Distribution is a discrete probability distribution
+* with parameters n = *number of trials* and p = *probability of success*.
+* See: [Binomial Distribution](https://en.wikipedia.org/wiki/Binomial_distribution)
+*/
+
+var Binomial = function (_Distribution) {
+  babelHelpers.inherits(Binomial, _Distribution);
+  babelHelpers.createClass(Binomial, null, [{
     key: 'mean',
+
+
+    /**
+     * Get the mean.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The mean of B(n,p).
+     */
     value: function mean(p, n) {
       return n * p;
     }
   }, {
     key: 'variance',
+
+
+    /**
+     * Get the variance.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The variance of B(n,p).
+     */
     value: function variance(p, n) {
       return n * p * (1 - p);
     }
   }, {
     key: 'stdDev',
+
+
+    /**
+     * Get the standard deviation.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The standard deviation of B(n,p).
+     */
     value: function stdDev(p, n) {
       return Math.sqrt(n * p * (1 - p));
     }
   }, {
     key: 'relativeStdDev',
+
+
+    /**
+     * Get the relative standard deviation.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The relative standard deviation of B(n,p).
+     */
     value: function relativeStdDev(p, n) {
       return Math.sqrt((1 - p) / (n * p));
     }
   }, {
     key: 'skewness',
+
+
+    /**
+     * Get the skewness.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The skewness of B(n,p).
+     */
     value: function skewness(p, n) {
       return (1 - 2 * p) / Math.sqrt(n * p * (1 - p));
     }
   }, {
     key: 'kurtosis',
+
+
+    /**
+     * Get the kurtosis.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The kurtosis of B(n,p).
+     */
     value: function kurtosis(p, n) {
       return 3 - 6 / n + 1 / (n * p * (1 - p));
     }
   }, {
     key: 'random',
-    value: function random(prob, n) {
-      if (typeof prob != 'number' || prob > 1 || prob < 0) throw new Error("p must be between 0 and 1.");
+
+
+    /**
+     * Generate a random value from B(n, p).
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The random value from B(n,p).
+     */
+    value: function random(p, n) {
+      var _this2 = this;
+
+      if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
       if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");
       if (n == 0) return 0;
 
       var flipped = false;
       var ix = 0;
-      var p = void 0;
-      if (prob > 0.5) {
+      var prob = void 0;
+      if (p > 0.5) {
         flipped = true;
-        p = 1 - prob;
-      } else p = prob;
-      var q = 1 - p;
-      var s = p / q;
-      var np = n * p;
+        prob = 1 - p;
+      } else prob = p;
+      var q = 1 - prob;
+      var s = prob / q;
+      var np = n * prob;
       if (np < SMALL_MEAN) {
         var f = Math.pow(q, n);
-        var u = Math.random();
+        var u = babelHelpers.get(Object.getPrototypeOf(Binomial), 'random', this).call(this);
         while (ix <= n && u >= f) {
           u -= f;
           f *= s * (n - ix) / (ix + 1);
@@ -488,7 +774,7 @@ var BinomialDistribution = function () {
       } else {
         (function () {
 
-          var ffm = np + p;
+          var ffm = np + prob;
           var fm = Math.floor(ffm);
           var xm = fm + 0.5;
           var npq = np * q;
@@ -501,7 +787,7 @@ var BinomialDistribution = function () {
           var c = 0.134 + 20.5 / (15.3 + fm);
           var p2 = p1 * (1.0 + c + c);
 
-          var al = (ffm - xl) / (ffm - xl * p);
+          var al = (ffm - xl) / (ffm - xl * prob);
           var lambda_l = al * (1.0 + 0.5 * al);
           var ar = (xr - ffm) / (xr * q);
           var lambda_r = ar * (1 + 0.5 + ar);
@@ -514,8 +800,8 @@ var BinomialDistribution = function () {
               v = void 0;
 
           var tryAgain = function tryAgain() {
-            u = Math.random() * p4;
-            v = Math.random();
+            u = babelHelpers.get(Object.getPrototypeOf(Binomial), 'random', _this2).call(_this2) * p4;
+            v = babelHelpers.get(Object.getPrototypeOf(Binomial), 'random', _this2).call(_this2);
             if (u <= p1) {
               ix = Math.floor(xm - p1 * v + u);
             } else if (u <= p2) {
@@ -538,7 +824,7 @@ var BinomialDistribution = function () {
             var w1 = n - ix - 1;
             var f1 = fm + 1;
             var z1 = n + 1 - fm;
-            accept = xm * Math.log(f1 / x1) + (n - fm + .5) * Math.log(z1 / w1) + (ix - fm) * Math.log(w1 * p / (x1 * q)) + stirling(f1) + stirling(z1) - stirling(x1) - stirling(w1);
+            accept = xm * Math.log(f1 / x1) + (n - fm + .5) * Math.log(z1 / w1) + (ix - fm) * Math.log(w1 * prob / (x1 * q)) + stirling(f1) + stirling(z1) - stirling(x1) - stirling(w1);
             // skipped the faster options for now
             if (varr > accept) tryAgain();
           };
@@ -550,15 +836,33 @@ var BinomialDistribution = function () {
     }
   }, {
     key: 'sample',
+
+
+    /**
+     * Generate an array of k random values from B(n, p).
+     * @param {number} k - The number of values to generate.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {Array<number>} An array of random values from B(n,p).
+     */
     value: function sample(k, p, n) {
-      var _this = this;
+      var _this3 = this;
 
       return Array.apply(null, Array(k)).map(function () {
-        return _this.random(p, n);
+        return _this3.random(p, n);
       });
     }
   }, {
     key: 'pmf',
+
+
+    /**
+     * Calculate the probability of exaclty k in B(n, p).
+     * @param {number} k - The value to predict.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The probability of k happening in B(n,p).
+     */
     value: function pmf(k, p, n) {
       if (k < 0 || k > n) return 0;else {
         var P = void 0;
@@ -580,8 +884,17 @@ var BinomialDistribution = function () {
     }
   }, {
     key: 'cdf',
+
+
+    /**
+     * Calculate the probability of k or less in B(n, p).
+     * @param {number} k - The value to predict.
+     * @param {number} p - The probability of success.
+     * @param {number} n - number of trials.
+     * @return {number} The probability getting a value of k or less from B(n,p).
+     */
     value: function cdf(k, p, n) {
-      if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");else if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");else if (k < 0) return 0;else return Array.apply(null, Array(Math.floor(k))).map(function (_, i) {
+      if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");else if (typeof k != 'number') throw new Error("k must be a number.");else if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");else if (k < 0) return 0;else if (n < k) return 1;else return Array.apply(null, Array(Math.floor(k) + 1)).map(function (_, i) {
         return choose(n, i) * Math.pow(p, i) * Math.pow(1 - p, n - i);
       }).reduce(function (prev, next) {
         return prev + next;
@@ -589,70 +902,150 @@ var BinomialDistribution = function () {
     }
   }]);
 
-  function BinomialDistribution(p, n) {
-    var _this2 = this;
 
-    babelHelpers.classCallCheck(this, BinomialDistribution);
+  /**
+   * Generate a new Binomial object.
+   * @param {number} p - The probability of success.
+   * @param {number} n - number of trials.
+   */
 
-    this.pdf = function (k) {
-      return _this2.constructor.pmf(k, _this2.p, _this2.n);
-    };
-
-    this.cdf = function (k) {
-      return _this2.constructor.cdf(k, _this2.p, _this2.n);
-    };
-
-    this.random = function () {
-      return _this2.constructor.random(_this2.p, _this2.n);
-    };
-
-    this.sample = function (k) {
-      return _this2.constructor.sample(k, _this2.p, _this2.n);
-    };
+  function Binomial(p, n) {
+    babelHelpers.classCallCheck(this, Binomial);
 
     if (p == undefined || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
     if (n == undefined || n < 0) throw new Error("n must be positive or zero.");
-    this.p = p;
-    this.n = n;
-    this.mu = this.constructor.mean(p, n);
-    this.variance = this.constructor.variance(p, n);
-    this.stdDev = this.constructor.stdDev(p, n);
-    this.relStdDev = this.constructor.relativeStdDev(p, n);
-    this.skewness = this.constructor.skewness(p, n);
-    this.kurtosis = this.constructor.kurtosis(p, n);
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Binomial).call(this));
+
+    _this.pdf = function (k) {
+      return _this.constructor.pmf(k, _this.p, _this.n);
+    };
+
+    _this.cdf = function (k) {
+      return _this.constructor.cdf(k, _this.p, _this.n);
+    };
+
+    _this.random = function () {
+      return _this.constructor.random(_this.p, _this.n);
+    };
+
+    _this.sample = function (k) {
+      return _this.constructor.sample(k, _this.p, _this.n);
+    };
+
+    _this.p = p;
+    _this.n = n;
+    _this.mu = _this.constructor.mean(p, n);
+    _this.variance = _this.constructor.variance(p, n);
+    _this.stdDev = _this.constructor.stdDev(p, n);
+    _this.relStdDev = _this.constructor.relativeStdDev(p, n);
+    _this.skewness = _this.constructor.skewness(p, n);
+    _this.kurtosis = _this.constructor.kurtosis(p, n);
+    return _this;
   }
 
-  return BinomialDistribution;
-}();
+  /**
+   * Calculate the probability of exaclty k in B(n, p).
+   * @memberof Binomial
+   * @instance
+   * @param {number} k - The value to predict.
+   * @return {number} The probability of k happening in B(n,p).
+   */
 
-BinomialDistribution.covariates = 2;
-BinomialDistribution.discrete = true;
 
-var BernoulliDistribution = function (_BinomialDistribution) {
-  babelHelpers.inherits(BernoulliDistribution, _BinomialDistribution);
-  babelHelpers.createClass(BernoulliDistribution, null, [{
+  /**
+   * Calculate the probability of k or less in B(n, p).
+   * @memberof Binomial
+   * @instance
+   * @param {number} k - The value to predict.
+   * @return {number} The probability getting a value of k or less from B(n,p).
+   */
+
+
+  /**
+   * Generate a random value from B(n, p).
+   * @memberof Binomial
+   * @instance
+   * @return {number} The random value from B(n,p).
+   */
+
+
+  /**
+   * Generate an array of k random values from B(n, p).
+   * @memberof Binomial
+   * @instance
+   * @param {number} k - The number of values to generate.
+   * @return {Array<number>} An array of random values from B(n,p).
+   */
+
+
+  return Binomial;
+}(Distribution);
+
+Binomial.covariates = 2;
+Binomial.discrete = true;
+
+/**
+* The Binomial Distribution is a discrete probability distribution
+* with parameters n = *number of trials* and p = *probability of success*.
+* See: [Bernoulli Distribution](https://en.wikipedia.org/wiki/Bernoulli_distribution)
+* @extends Binomial
+*/
+
+var Bernoulli = function (_Binomial) {
+  babelHelpers.inherits(Bernoulli, _Binomial);
+  babelHelpers.createClass(Bernoulli, null, [{
     key: 'random',
+
+
+    /**
+     * Generate a random value from B(1, p).
+     * @param {number} p - The probability of success.
+     * @return {number} The random value from B(1,p).
+     */
     value: function random(p) {
       if (p == undefined || p < 0 || p > 1) throw new Error('p must be between zero and one inclusive.');
-      var u = Math.random();
+      var u = Distribution.random();
       if (u < p) return 1;else return 0;
     }
   }, {
     key: 'pmf',
+
+
+    /**
+     * Calculate the probability of exaclty k in B(1, p).
+     * @param {number} k - The value to predict.
+     * @param {number} p - The probability of success.
+     * @return {number} The probability of k happening in B(1,p).
+     */
     value: function pmf(k, p) {
       if (k == 0) return 1 - p;else if (k == 1) return p;else return 0;
     }
   }, {
     key: 'cdf',
+
+
+    /**
+     * Calculate the probability of k or less in B(1, p).
+     * @param {number} k - The value to predict.
+     * @param {number} p - The probability of success.
+     * @return {number} The probability getting a value of k or less from B(1,p).
+     */
     value: function cdf(k, p) {
-      if (k == 1) return 1 - p;else if (k == 0) return p;else return NaN;
+      if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between zero and one inclusive.");else if (typeof k != 'number') throw new Error("k must be a number.");else if (k == 1) return p;else if (k == 0) return 1 - p;else return NaN;
     }
   }]);
 
-  function BernoulliDistribution(p) {
-    babelHelpers.classCallCheck(this, BernoulliDistribution);
 
-    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(BernoulliDistribution).call(this, p, 1));
+  /**
+   * Generate a new Bernoulli object.
+   * @param {number} p - The probability of success.
+   */
+
+  function Bernoulli(p) {
+    babelHelpers.classCallCheck(this, Bernoulli);
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Bernoulli).call(this, p, 1));
 
     _this.pdf = function (k) {
       return _this.constructor.pmf(k, _this.p);
@@ -675,15 +1068,51 @@ var BernoulliDistribution = function (_BinomialDistribution) {
     return _this;
   }
 
-  return BernoulliDistribution;
-}(BinomialDistribution);
+  /**
+   * Calculate the probability of exaclty k in B(1, p).
+   * @memberof Bernoulli
+   * @instance
+   * @param {number} k - The value to predict.
+   * @return {number} The probability of k happening in B(1,p).
+   */
 
-BernoulliDistribution.covariates = 1;
+
+  /**
+  * Calculate the probability of k or less in B(1, p).
+   * @memberof Bernoulli
+   * @instance
+   * @param {number} k - The value to predict.
+   * @return {number} The probability getting a value of k or less from B(1,p).
+   */
+
+
+  /**
+   * Generate a random value from B(1, p).
+   * @memberof Bernoulli
+   * @instance
+   * @return {number} The random value from B(1,p).
+   */
+
+
+  /**
+   * Generate an array of k random values from B(1, p).
+   * @memberof Bernoulli
+   * @instance
+   * @param {number} k - The number of values to generate.
+   * @return {Array<number>} An array of random values from B(1,p).
+   */
+
+
+  return Bernoulli;
+}(Binomial);
+
+Bernoulli.covariates = 1;
 
 //http://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.stats.t.html
 //https://github.com/chbrown/nlp/blob/master/src/main/java/cc/mallet/util/StatFunctions.java - CDF - ln236
 
-var StudentsTDistribution = function () {
+var StudentsTDistribution = function (_Distribution) {
+  babelHelpers.inherits(StudentsTDistribution, _Distribution);
   babelHelpers.createClass(StudentsTDistribution, null, [{
     key: 'random',
     value: function random(df) {
@@ -740,41 +1169,43 @@ var StudentsTDistribution = function () {
   }]);
 
   function StudentsTDistribution(df) {
-    var _this = this;
-
     babelHelpers.classCallCheck(this, StudentsTDistribution);
 
-    this.pdf = function (t) {
+    if (df >= 0) throw RangeError('df must be greater than zero.');
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(StudentsTDistribution).call(this));
+
+    _this.pdf = function (t) {
       return _this.constructor.pdf(t, _this.df);
     };
 
-    this.cdf = function (t) {
+    _this.cdf = function (t) {
       return _this.constructor.cdf(t, _this.df);
     };
 
-    this.random = function () {
+    _this.random = function () {
       return _this.constructor.random(_this.df);
     };
 
-    this.sample = function (n) {
+    _this.sample = function (n) {
       return Array.apply(null, Array(n)).map(function () {
         return _this.random();
       });
     };
 
-    if (df >= 0) throw RangeError('df must be greater than zero.');
-    this.df = df;
+    _this.df = df;
+    return _this;
   }
 
   return StudentsTDistribution;
-}();
+}(Distribution);
 
 StudentsTDistribution.covariates = 1;
 
 /**
 * The sample class is the base for all of our sample based calculations.
 * These methods can be directly accessed on the class or renerated via
-* a class instance. You'll need a Sample object for tTest.
+* a class instance. You'll need a Sample object for the ttest function.
 */
 
 var Sample = function () {
@@ -868,7 +1299,7 @@ var Sample = function () {
      * Get the relative standard deviation or coefficient of variation.
      * [See](https://en.wikipedia.org/wiki/Coefficient_of_variation).
      * @param {Array<number>} x - The sample data.
-     * @return {number} The standard deviation of the mean.
+     * @return {number} The relative standard deviation.
      */
     value: function relativeStdDev(x) {
       return this.stdDev(x) / mean(x);
@@ -882,7 +1313,7 @@ var Sample = function () {
      * The .5 quantile is the median. Together they are the quartiles.
      * [See](https://en.wikipedia.org/wiki/Quartile).
      * @param {Array<number>} x - The sample data.
-     * @return {number} The standard deviation of the mean.
+     * @return {number} The quartiles.
      */
     value: function quartiles(x) {
       return quantile(x, [.25, .5, .75]);
@@ -967,6 +1398,7 @@ var Sample = function () {
 
   /**
    * Generate a new Sample object.
+   * @constructs Sample
    * @param {Array<number>} x - The sample data.
    */
 
@@ -1000,13 +1432,14 @@ var Sample = function () {
   }
 
   /**
-   * Get the correlation.
-   * [See](https://en.wikipedia.org/wiki/Correlation_and_dependence).
+   * Get the covariance.
+   * [See](https://en.wikipedia.org/wiki/Covariance).
    * @memberof Sample
    * @instance
    * @param {Sample} y - A Sample object.
-   * @return {number} The correlation.
+   * @return {number} The covariance.
    */
+
 
   /**
    * Get the correlation.
@@ -1021,7 +1454,17 @@ var Sample = function () {
   return Sample;
 }();
 
-function tTest(sample, other, x) {
+/**
+ * Computes Student's T-Test for the provided samples.
+ * If only one sample is provided, a one-sample t-test is computed on the sample mean vs x.
+ * If two samples are provided, a two-sample t-test is computed on the difference between the sample means and x.
+ * See: [Student's T-Test](https://en.wikipedia.org/wiki/Student%27s_t-test)
+ * @param {Sample} sample - The sample to test
+ * @param {Sample} [other] - An optional sample to compare with a two sample test.
+ * @param {number} [x=0] - The mean or difference to test.
+ * @return {number} The t-statistic or NaN if the sample is the empty set.
+ */
+function ttest(sample, other, x) {
   if (!sample) return NaN;
   if (!other) return (sample.mean - x) / (sample.std / Math.sqrt(sample.size));else {
     var difference = x || 0;
@@ -1030,4 +1473,4 @@ function tTest(sample, other, x) {
   }
 }
 
-export { choose, factorial, gamma, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, BinomialDistribution as Binomial, BernoulliDistribution as Bernoulli, StudentsTDistribution as StudentsT, Sample, tTest as ttest };
+export { choose, error, factorial, gamma, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, Normal, Binomial, Bernoulli, StudentsTDistribution as StudentsT, Sample, ttest };

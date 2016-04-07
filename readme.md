@@ -8,9 +8,11 @@
 
 - Bernoulli
 - Binomial
-- Cauchy  (Soon - Needs Testing)
-- Gamma   (Soon - Needs Testing)
-- Normal  (Soon - Needs Testing)
+- Normal
+- Cauchy      (Soon)
+- Gamma       (Soon)
+- Chi-Square  (Soon)
+- Student's T (Partial - Missing random value generation.)
 
 ### Statistics
 
@@ -20,6 +22,7 @@
 ### General Functions
 
 - n Choose k
+- Error Function
 - Factorial
 - Gamma
 - Log-Gamma

@@ -2,6 +2,8 @@ import test from 'blue-tape';
 
 import { Binomial } from '../distributions';
 
+//Test at http://stattrek.com/online-calculator/binomial.aspx
+
 let round = (x) => Math.round(x * 10000) / 10000;
 
 test('distributions/binomial', (t) => {
@@ -48,6 +50,28 @@ test('distributions/binomial', (t) => {
     t.end();
   });
 
+  t.test('distributions/binomial/cdf', t => {
+    let cdf = Binomial.cdf;
+
+    t.test('throws on bad params', t => {
+      t.throws( () => cdf(1, 1.5, 1000) );
+      t.throws( () => cdf(1, -.5, 1000) );
+      t.throws( () => cdf(1, 'test', 1000) );
+      t.throws( () => cdf(1, .5, 'test') );
+      t.throws( () => cdf('test', .5, 1000) );
+      t.end()
+    });
+
+    t.test('generates accurate values', t => {
+      t.equal( cdf(-1, .5, 1000), 0 );
+      t.equal( cdf(1001, .5, 1000), 1 );
+      t.equal( round(cdf(275, .25, 1000)), .9677 );
+      t.equal( round(cdf(531, .50, 1000)), .9769 );
+      t.equal( round(cdf(742, .75, 1000)), .2905 );
+      t.end()
+    });
+  });
+
   t.test('validates and generates the class', t => {
 
     // Make sure it throws on missing args.
@@ -68,6 +92,7 @@ test('distributions/binomial', (t) => {
     t.ok( dist.random() <= dist.n );
     t.equal( Math.round(dist.sample(1000).reduce( (p,n) => p+n ) / 1000), dist.mu );
     t.equal( round(dist.pdf(2)), 0.0439 );
+    t.equal( round(dist.cdf(2)), 0.0547 );
     t.end();
   })
 });
