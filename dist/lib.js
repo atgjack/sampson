@@ -190,6 +190,25 @@
     };
   };
 
+  var EPS = 1e-14;
+  /**
+   * The regularized lower incomplete gamma function
+   * [See](https://en.wikipedia.org/wiki/Incomplete_gamma_function#Lower_incomplete_Gamma_function)
+   * @param {number} n - The number.
+   * @return {number} An approximation of (n-1)! or Infinity if n is a negative integer.
+   */
+  // Code kanged from: [samtools](https://github.com/lh3/samtools/blob/master/bcftools/kfunc.c)
+  function lower(s, z) {
+    var sum = void 0,
+        x = void 0,
+        k = void 0;
+    for (k = 1, sum = 1, x = 1; k < 100; ++k) {
+      sum += x *= z / (s + k);
+      if (x / sum < EPS) break;
+    };
+    return Math.exp(s * Math.log(z) - z - lngamma(s + 1) + Math.log(sum));
+  };
+
   /**
    *
    * Adds a list of elements together.
@@ -495,8 +514,8 @@
   var last = NaN;
 
   /**
-  * The Binomial Distribution is a discrete probability distribution
-  * with parameters n = *number of trials* and p = *probability of success*.
+  * The Normal Distribution is a continuous probability distribution
+  * with parameters mu = *mean* and sigma = *standard deviation*.
   * See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
   */
 
@@ -653,6 +672,198 @@
 
   Normal.covariates = 2;
   Normal.discrete = false;
+
+  // Code kanged from: https://github.com/ampl/gsl/blob/master/randist/gamma.c
+
+  /**
+  * The Gamma Distribution is a continuous probability distribution
+  * with parameters a = *shape* and b = *rate*.
+  * See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
+  */
+
+  var Gamma = function (_Distribution) {
+    babelHelpers.inherits(Gamma, _Distribution);
+    babelHelpers.createClass(Gamma, null, [{
+      key: 'random',
+
+
+      /**
+       * Generate a random value from Gamma(a, b).
+       * @param {number} a - The shape.
+       * @param {number} a - The rate.
+       * @return {number} The random value from  Gamma(a, b).
+       */
+      value: function random(a, b) {
+        if (typeof a != 'number' || typeof a != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
+        if (a <= 0) throw new Error('a must be greater than zero.');
+        if (b <= 0) throw new Error('b must be greater than zero.');
+        if (a < 1) {
+          var u = babelHelpers.get(Object.getPrototypeOf(Gamma), 'random', this).call(this);
+          return this.random(1 + a, b) * Math.pow(u, 1 / a);
+        } else {
+          var x = void 0,
+              v = void 0,
+              _u = void 0;
+          var d = a - 1 / 3;
+          var c = 1 / Math.sqrt(9 * d);
+          while (1) {
+            do {
+              x = Normal.random(0, 1);
+              v = 1 + c * x;
+            } while (v <= 0);
+            v = v * v * v;
+            while (!_u) {
+              _u = babelHelpers.get(Object.getPrototypeOf(Gamma), 'random', this).call(this);
+            };
+            if (_u < 1 - 0.0331 * x * x * x * x) break;
+            if (Math.log(_u) < 0.5 * x * x + d * (1 - v + Math.log(v))) break;
+          };
+          return d * v / b;
+        }
+      }
+    }, {
+      key: 'pdf',
+
+
+      /**
+       * Calculate the probability of exaclty x in Gamma(a, b).
+       * @param {number} x - The value to predict.
+       * @param {number} a - The shape.
+       * @param {number} a - The rate.
+       * @return {number} The probability of x happening in Gamma(a, b).
+       */
+      value: function pdf(x, a, b) {
+        if (typeof a != 'number' || typeof b != 'number') throw new Error('Need a and b for the gamma distribution.');
+        if (typeof x != 'number') throw new Error('x must be a number.');
+        if (a <= 0) throw new Error('a must be greater than zero.');
+        if (b <= 0) throw new Error('b must be greater than zero.');
+        if (x < 0) {
+          return 0;
+        } else if (x == 0) {
+          if (a == 1) return b;else return 0;
+        } else if (a == 1) {
+          return Math.exp(-x * b) * b;
+        } else {
+          return Math.exp((a - 1) * Math.log(x * b) - x * b - lngamma(a)) * b;
+        };
+      }
+    }, {
+      key: 'cdf',
+
+
+      /**
+       * Calculate the probability of getting x or less Gamma(a, b).
+       * @param {number} x - The value to predict.
+       * @param {number} a - The shape.
+       * @param {number} a - The rate.
+       * @return {number} The probability of getting x or less from Gamma(a, b).
+       */
+      value: function cdf(x, a, b) {
+        if (typeof a != 'number' || typeof b != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
+        if (typeof x != 'number') throw new Error('x must be a number.');
+        if (a <= 0) throw new Error('a must be greater than zero.');
+        if (b <= 0) throw new Error('b must be greater than zero.');
+        if (x <= 0) return 0;else return lower(a, x * b);
+      }
+    }, {
+      key: 'sample',
+
+
+      /**
+       * Generate an array of k random values from Gamma(a, b).
+       * @param {number} k - The number of values to generate.
+       * @param {number} a - The shape.
+       * @param {number} a - The rate.
+       * @return {Array<number>} An array of random values from Gamma(a, b).
+       */
+      value: function sample(x, a, b) {
+        var _this2 = this;
+
+        return Array.apply(null, Array(x)).map(function () {
+          return _this2.random(a, b);
+        });
+      }
+    }]);
+
+
+    /**
+     * Generate a new Gamma object.
+     * @param {number} a - The shape.
+     * @param {number} a - The rate.
+     */
+
+    function Gamma(a, b) {
+      babelHelpers.classCallCheck(this, Gamma);
+
+      if (typeof a != 'number' || typeof b != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
+      if (a <= 0) throw new Error('a must be greater than zero.');
+      if (b <= 0) throw new Error('b must be greater than zero.');
+
+      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Gamma).call(this));
+
+      _this.pdf = function (x) {
+        return _this.constructor.pdf(x, _this.a, _this.b);
+      };
+
+      _this.cdf = function (x) {
+        return _this.constructor.cdf(x, _this.a, _this.b);
+      };
+
+      _this.random = function () {
+        return _this.constructor.random(_this.a, _this.b);
+      };
+
+      _this.sample = function (n) {
+        return _this.constructor.sample(n, _this.a, _this.b);
+      };
+
+      _this.a = a;
+      _this.b = b;
+      _this.mu = a / b;
+      _this.variance = a / (b * b);
+      return _this;
+    }
+
+    /**
+     * Calculate the probability of exaclty x in Gamma(a, b).
+     * @memberof Gamma
+     * @instance
+     * @param {number} x - The value to predict.
+     * @return {number} The probability of x happening in Gamma(a, b).
+     */
+
+
+    /**
+     * Calculate the probability of getting x or less from Gamma(a, b).
+     * @memberof Gamma
+     * @instance
+     * @param {number} x - The value to predict.
+     * @return {number} The probability of getting x or less from Gamma(a, b).
+     */
+
+
+    /**
+     * Generate a random value from Gamma(a, b).
+     * @memberof Gamma
+     * @instance
+     * @return {number} The random value from Gamma(a, b).
+     */
+
+
+    /**
+     * Generate an array of k random values from Gamma(a, b).
+     * @param {number} k - The number of values to generate.
+     * @memberof Gamma
+     * @instance
+     * @return {Array<number>} An array of random values from Gamma(a, b).
+     */
+
+
+    return Gamma;
+  }(Distribution);
+
+  Gamma.covariates = 2;
+  Gamma.discrete = false;
 
   var SMALL_MEAN = 14;
 
@@ -1114,15 +1325,70 @@
 
   Bernoulli.covariates = 1;
 
-  //http://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.stats.t.html
-  //https://github.com/chbrown/nlp/blob/master/src/main/java/cc/mallet/util/StatFunctions.java - CDF - ln236
+  //https://github.com/ampl/gsl/blob/master/randist/chisq.c
+
+  var ChiSquare = function (_Distribution) {
+    babelHelpers.inherits(ChiSquare, _Distribution);
+    babelHelpers.createClass(ChiSquare, null, [{
+      key: 'random',
+      value: function random(df) {
+        return 2 * Gamma.random(df / 2, 1);
+      }
+    }, {
+      key: 'pdf',
+      value: function pdf(x, df) {
+        if (df <= 0) return NaN;else if (x < 0) return 0;else if (df == 2) return Math.exp(-x / 2) / 2;else {
+          return Math.exp((df / 2 - 1) * Math.log(x / 2) - x / 2 - lngamma(df / 2) / 2);
+        }
+      }
+    }, {
+      key: 'cdf',
+      value: function cdf(x, df) {
+        throw new Error('not implemented.');
+      }
+    }]);
+
+    function ChiSquare(df) {
+      babelHelpers.classCallCheck(this, ChiSquare);
+
+      if (df >= 0) throw RangeError('df must be greater than zero.');
+
+      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ChiSquare).call(this));
+
+      _this.pdf = function (x) {
+        return _this.constructor.pdf(x, _this.df);
+      };
+
+      _this.cdf = function (x) {
+        return _this.constructor.cdf(x, _this.df);
+      };
+
+      _this.random = function () {
+        return _this.constructor.random(_this.df);
+      };
+
+      _this.df = df;
+      return _this;
+    }
+
+    return ChiSquare;
+  }(Distribution);
+
+  ChiSquare.covariates = 1;
+
+  // https://github.com/ampl/gsl/blob/master/randist/tdist.c
+  // http://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.stats.t.html
+  // https://github.com/chbrown/nlp/blob/master/src/main/java/cc/mallet/util/StatFunctions.java - CDF - ln236
 
   var StudentsTDistribution = function (_Distribution) {
     babelHelpers.inherits(StudentsTDistribution, _Distribution);
     babelHelpers.createClass(StudentsTDistribution, null, [{
       key: 'random',
       value: function random(df) {
-        throw new Error('not implemented.');
+        //if (df <= 2)
+        var y1 = Normal.random(0, 1);
+        var y2 = ChiSquare.random(df);
+        return y1 / Math.sqrt(y2 / df);
       }
     }, {
       key: 'pdf',
@@ -1483,6 +1749,7 @@
   exports.error = error;
   exports.factorial = factorial;
   exports.gamma = gamma;
+  exports.gammainc = lower;
   exports.lngamma = lngamma;
   exports.median = median;
   exports.mean = mean;
@@ -1501,6 +1768,7 @@
   exports.Binomial = Binomial;
   exports.Bernoulli = Bernoulli;
   exports.StudentsT = StudentsTDistribution;
+  exports.Gamma = Gamma;
   exports.Sample = Sample;
   exports.ttest = ttest;
 

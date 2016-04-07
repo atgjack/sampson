@@ -250,10 +250,116 @@ Get the variance.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The variance of B(n,p).
 
+# Gamma
+
+The Gamma Distribution is a continuous probability distribution
+with parameters a = _shape_ and b = _rate_.
+See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
+
+## cdf
+
+Calculate the probability of getting x or less from Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Gamma(a, b).
+
+## constructor
+
+Generate a new Gamma object.
+
+**Parameters**
+
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **** 
+
+## pdf
+
+Calculate the probability of exaclty x in Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Gamma(a, b).
+
+## random
+
+Generate a random value from Gamma(a, b).
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from Gamma(a, b).
+
+## sample
+
+Generate an array of k random values from Gamma(a, b).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Gamma(a, b).
+
+## cdf
+
+Calculate the probability of getting x or less Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Gamma(a, b).
+
+## pdf
+
+Calculate the probability of exaclty x in Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Gamma(a, b).
+
+## random
+
+Generate a random value from Gamma(a, b).
+
+**Parameters**
+
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from  Gamma(a, b).
+
+## sample
+
+Generate an array of k random values from Gamma(a, b).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Gamma(a, b).
+
 # Normal
 
-The Binomial Distribution is a discrete probability distribution
-with parameters n = _number of trials_ and p = _probability of success_.
+The Normal Distribution is a continuous probability distribution
+with parameters mu = _mean_ and sigma = _standard deviation_.
 See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
 
 ## cdf
@@ -582,6 +688,17 @@ It's (n - 1)! and is used by the gamma function for n > 100.
 -   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** An approximation of ln(n-1)! or NaN if n &lt; 0.
+
+# lower
+
+The regularized lower incomplete gamma function
+[See](https://en.wikipedia.org/wiki/Incomplete_gamma_function#Lower_incomplete_Gamma_function)
+
+**Parameters**
+
+-   `n` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** An approximation of (n-1)! or Infinity if n is a negative integer.
 
 # mean
 
