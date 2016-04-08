@@ -2,8 +2,6 @@
 
 ### **Currently has the following:**
 
-### [Documentation](./api.md)
-
 ### Distributions
 
 - Bernoulli
