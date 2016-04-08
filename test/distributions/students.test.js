@@ -25,6 +25,13 @@ test('distributions/students', (t) => {
       t.equal( Math.round(average), 0 );
       t.end();
     });
+
+    t.test('generates values that average to the expected value when df is two', t => {
+      let values = Array.apply(null, Array(10000)).map( (_,i) => i ).map( i => random(2) )
+      let average = values.reduce( (prev, next) => prev + next ) / (10000)
+      t.equal( Math.round(average), 0 );
+      t.end();
+    });
   });
 
   t.test('distributions/students/pdf', t => {
@@ -40,6 +47,7 @@ test('distributions/students', (t) => {
 
     t.test('generates accurate values', t => {
       t.equals( round(pdf(-1, 4)), 0.2147 );
+      t.equals( round(pdf(1, 1)), 0.1592 );
       t.equals( round(pdf(4, 2)), 0.0131 );
       t.equals( round(pdf(4, 4)), 0.0067 );
       t.equals( round(pdf(1, 6)), 0.2231 );
@@ -60,6 +68,9 @@ test('distributions/students', (t) => {
 
     t.test('generates accurate values', t => {
       t.equals( round(cdf(-1, 4)), 0.1870 );
+      t.equals( round(cdf(1, 1)), 0.75 );
+      t.equals( round(cdf(-1, 2)), 0.2113 );
+      t.equals( round(cdf(1, 3)), 0.8045 );
       t.equals( round(cdf(4, 2)), 0.9714 );
       t.equals( round(cdf(4, 4)), 0.9919 );
       t.equals( round(cdf(1, 6)), 0.8220 );
