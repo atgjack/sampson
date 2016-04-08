@@ -667,12 +667,167 @@ var Normal = function (_Distribution) {
 Normal.covariates = 2;
 Normal.discrete = false;
 
+// Code kanged from: https://github.com/ampl/gsl/blob/master/randist/exponential.c
+
+/**
+* The Exponential Distribution is a continuous probability distribution
+* with parameters r = *rate*.
+* See: [Exponential Distribution](https://en.wikipedia.org/wiki/Exponential_distribution)
+*/
+
+var Exponential = function (_Distribution) {
+  babelHelpers.inherits(Exponential, _Distribution);
+  babelHelpers.createClass(Exponential, null, [{
+    key: 'random',
+
+
+    /**
+     * Generate a random value from Exponential(mu).
+     * @param {number} mu - The scale.
+     * @return {number} The random value from Exponential(mu).
+     */
+    value: function random(mu) {
+      if (typeof mu != 'number' || typeof mu != 'number') throw new Error('Need mu for the exponential distribution.');
+      if (mu <= 0) throw new Error('mu must be greater than zero.');
+      return -mu * Math.log1p(-babelHelpers.get(Object.getPrototypeOf(Exponential), 'random', this).call(this));
+    }
+  }, {
+    key: 'pdf',
+
+
+    /**
+     * Calculate the probability of exaclty x in Exponential(mu).
+     * @param {number} x - The value to predict.
+     * @param {number} mu - The scale.
+     * @return {number} The probability of x happening in Exponential(mu).
+     */
+    value: function pdf(x, mu) {
+      if (typeof mu != 'number') throw new Error('Need mu for the exponential distribution.');
+      if (typeof x != 'number') throw new Error('x must be a number.');
+      if (mu <= 0) throw new Error('a must be greater than zero.');
+      if (x < 0) {
+        return 0;
+      } else {
+        return Math.exp(-x / mu) / mu;
+      };
+    }
+  }, {
+    key: 'cdf',
+
+
+    /**
+     * Calculate the probability of getting x or less Exponential(mu).
+     * @param {number} x - The value to predict.
+     * @param {number} mu - The scale.
+     * @return {number} The probability of getting x or less from Exponential(mu).
+     */
+    value: function cdf(x, mu) {
+      if (typeof mu != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
+      if (typeof x != 'number') throw new Error('x must be a number.');
+      if (mu <= 0) throw new Error('a must be greater than zero.');
+      if (x <= 0) return 0;else return 1 - Math.exp(-x / mu);
+    }
+  }, {
+    key: 'sample',
+
+
+    /**
+     * Generate an array of k random values from Exponential(mu).
+     * @param {number} k - The number of values to generate.
+     * @param {number} mu - The scale.
+     * @return {Array<number>} An array of random values from Exponential(mu).
+     */
+    value: function sample(k, mu) {
+      var _this2 = this;
+
+      return Array.apply(null, Array(k)).map(function () {
+        return _this2.random(mu);
+      });
+    }
+  }]);
+
+
+  /**
+   * Generate a new Exponential object.
+   * @param {number} mu - The scale.
+   */
+
+  function Exponential(mu) {
+    babelHelpers.classCallCheck(this, Exponential);
+
+    if (typeof mu != 'number') throw new Error('Need mu for the exponential distribution.');
+    if (mu <= 0) throw new Error('mu must be greater than zero.');
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Exponential).call(this));
+
+    _this.pdf = function (x) {
+      return _this.constructor.pdf(x, _this.mu);
+    };
+
+    _this.cdf = function (x) {
+      return _this.constructor.cdf(x, _this.mu);
+    };
+
+    _this.random = function () {
+      return _this.constructor.random(_this.mu);
+    };
+
+    _this.sample = function (k) {
+      return _this.constructor.sample(k, _this.mu);
+    };
+
+    _this.mu = mu;
+    _this.mean = mu;
+    _this.variance = Math.pow(mu, -1);
+    return _this;
+  }
+
+  /**
+   * Calculate the probability of exaclty x in Exponential(mu).
+   * @memberof Exponential
+   * @instance
+   * @param {number} x - The value to predict.
+   * @return {number} The probability of x happening in Exponential(mu).
+   */
+
+
+  /**
+   * Calculate the probability of getting x or less from Exponential(mu).
+   * @memberof Exponential
+   * @instance
+   * @param {number} x - The value to predict.
+   * @return {number} The probability of getting x or less from Exponential(mu).
+   */
+
+
+  /**
+   * Generate a random value from Exponential(mu).
+   * @memberof Exponential
+   * @instance
+   * @return {number} The random value from Exponential(mu).
+   */
+
+
+  /**
+   * Generate an array of k random values from Exponential(mu).
+   * @param {number} k - The number of values to generate.
+   * @memberof Exponential
+   * @instance
+   * @return {Array<number>} An array of random values from Exponential(mu).
+   */
+
+
+  return Exponential;
+}(Distribution);
+
+Exponential.covariates = 2;
+
 // Code kanged from: https://github.com/ampl/gsl/blob/master/randist/gamma.c
 
 /**
 * The Gamma Distribution is a continuous probability distribution
 * with parameters a = *shape* and b = *rate*.
-* See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
+* See: [Gamma Distribution](https://en.wikipedia.org/wiki/Gamma_distribution)
 */
 
 var Gamma = function (_Distribution) {
@@ -857,7 +1012,6 @@ var Gamma = function (_Distribution) {
 }(Distribution);
 
 Gamma.covariates = 2;
-Gamma.discrete = false;
 
 var SMALL_MEAN = 14;
 
@@ -1319,35 +1473,87 @@ var Bernoulli = function (_Binomial) {
 
 Bernoulli.covariates = 1;
 
-//https://github.com/ampl/gsl/blob/master/randist/chisq.c
+// Code kanged from: https://github.com/ampl/gsl/blob/master/randist/chisq.c
 
-var ChiSquare = function (_Distribution) {
-  babelHelpers.inherits(ChiSquare, _Distribution);
-  babelHelpers.createClass(ChiSquare, null, [{
+/**
+* The Chi-Squared Distribution is a continuous probability distribution
+* with parameters df = degrees of freedom*.
+* See: [Chi-Squared Distribution](https://en.wikipedia.org/wiki/Chi-squared_distribution)
+*/
+
+var ChiSquared = function (_Distribution) {
+  babelHelpers.inherits(ChiSquared, _Distribution);
+  babelHelpers.createClass(ChiSquared, null, [{
     key: 'random',
+
+
+    /**
+     * Generate a random value from ChiSquared(df).
+     * @param {number} df - The degrees of freedom.
+     * @return {number} The random value from ChiSquared(df).
+     */
     value: function random(df) {
-      return 2 * Gamma.random(df / 2, 1);
+      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');else return 2 * Gamma.random(df / 2, 1);
     }
   }, {
     key: 'pdf',
+
+
+    /**
+     * Calculate the probability of exaclty x in ChiSquared(df).
+     * @param {number} x - The value to predict.
+     * @param {number} df - The degrees of freedom.
+     * @return {number} The probability of x happening in ChiSquared(df).
+     */
     value: function pdf(x, df) {
-      if (df <= 0) return NaN;else if (x < 0) return 0;else if (df == 2) return Math.exp(-x / 2) / 2;else {
-        return Math.exp((df / 2 - 1) * Math.log(x / 2) - x / 2 - lngamma(df / 2) / 2);
+      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');else if (typeof x != 'number') throw new TypeError('x must be a number');else if (x < 0) return 0;else if (df == 2) return Math.exp(-x / 2) / 2;else {
+        return Math.exp((df / 2 - 1) * Math.log(x / 2) - x / 2 - lngamma(df / 2)) / 2;
       }
     }
   }, {
     key: 'cdf',
+
+
+    /**
+     * Calculate the probability of getting x or less ChiSquared(df).
+     * @param {number} x - The value to predict.
+     * @param {number} df - The degrees of freedom.
+     * @return {number} The probability of getting x or less from ChiSquared(df).
+     */
     value: function cdf(x, df) {
-      throw new Error('not implemented.');
+      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');else if (typeof x != 'number') throw new TypeError('x must be a number');else if (x < 0) return 0;else if (df == 2) return 1 - Math.exp(-x / 2);else return lower(df / 2, x / 2);
+    }
+  }, {
+    key: 'sample',
+
+
+    /**
+     * Generate an array of k random values from ChiSquared(df).
+     * @param {number} k - The number of values to generate.
+     * @param {number} df - The degrees of freedom.
+     * @return {Array<number>} An array of random values from ChiSquared(df).
+     */
+    value: function sample(k, df) {
+      var _this2 = this;
+
+      return Array.apply(null, Array(k)).map(function () {
+        return _this2.random(df);
+      });
     }
   }]);
 
-  function ChiSquare(df) {
-    babelHelpers.classCallCheck(this, ChiSquare);
 
-    if (df >= 0) throw RangeError('df must be greater than zero.');
+  /**
+   * Generate a new ChiSquared object.
+   * @param {number} df - The degrees of freedom.
+   */
 
-    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ChiSquare).call(this));
+  function ChiSquared(df) {
+    babelHelpers.classCallCheck(this, ChiSquared);
+
+    if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ChiSquared).call(this));
 
     _this.pdf = function (x) {
       return _this.constructor.pdf(x, _this.df);
@@ -1361,85 +1567,193 @@ var ChiSquare = function (_Distribution) {
       return _this.constructor.random(_this.df);
     };
 
+    _this.sample = function (n) {
+      return _this.constructor.sample(n, _this.df);
+    };
+
     _this.df = df;
+    _this.mu = df;
+    _this.variance = 2 * df;
     return _this;
   }
 
-  return ChiSquare;
+  /**
+   * Calculate the probability of exaclty x in ChiSquared(df).
+   * @memberof ChiSquared
+   * @instance
+   * @param {number} x - The value to predict.
+   * @return {number} The probability of x happening in ChiSquared(df).
+   */
+
+
+  /**
+   * Calculate the probability of getting x or less from ChiSquared(df).
+   * @memberof ChiSquared
+   * @instance
+   * @param {number} x - The value to predict.
+   * @return {number} The probability of getting x or less from ChiSquared(df).
+   */
+
+
+  /**
+   * Generate a random value from ChiSquared(df).
+   * @memberof ChiSquared
+   * @instance
+   * @return {number} The random value from ChiSquared(df).
+   */
+
+
+  /**
+   * Generate an array of k random values from ChiSquared(df).
+   * @param {number} k - The number of values to generate.
+   * @memberof ChiSquared
+   * @instance
+   * @return {Array<number>} An array of random values from ChiSquared(df).
+   */
+
+
+  return ChiSquared;
 }(Distribution);
 
-ChiSquare.covariates = 1;
+ChiSquared.covariates = 1;
 
-// https://github.com/ampl/gsl/blob/master/randist/tdist.c
-// http://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.stats.t.html
-// https://github.com/chbrown/nlp/blob/master/src/main/java/cc/mallet/util/StatFunctions.java - CDF - ln236
+// Code kanged from: https://github.com/ampl/gsl/blob/master/randist/tdist.c
+// Code kanged from: http://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.stats.t.html
+// Code kanged from: https://github.com/chbrown/nlp/blob/master/src/main/java/cc/mallet/util/StatFunctions.java - CDF - ln236
 
-var StudentsTDistribution = function (_Distribution) {
-  babelHelpers.inherits(StudentsTDistribution, _Distribution);
-  babelHelpers.createClass(StudentsTDistribution, null, [{
+/**
+* The Chi-Squared Distribution is a continuous probability distribution
+* with parameters df = degrees of freedom*.
+* See: [Student's t-Distribution](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
+*/
+
+var StudentsT = function (_Distribution) {
+  babelHelpers.inherits(StudentsT, _Distribution);
+  babelHelpers.createClass(StudentsT, null, [{
     key: 'random',
+
+
+    /**
+     * Generate a random value from StudentsT(df).
+     * @param {number} df - The degrees of freedom.
+     * @return {number} The random value from StudentsT(df).
+     */
     value: function random(df) {
-      //if (df <= 2)
-      var y1 = Normal.random(0, 1);
-      var y2 = ChiSquare.random(df);
-      return y1 / Math.sqrt(y2 / df);
-    }
-  }, {
-    key: 'pdf',
-    value: function pdf(t, df) {
-      if (df <= 0) return NaN;else {
-        return gamma((df + 1) / 2) / (Math.sqrt(Math.PI * df) * gamma(df / 2) * Math.pow(Math.pow(1 + t, 2 / df), -(df + 1) / 2));
+      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+      if (df <= 2) {
+        var y1 = Normal.random(0, 1);
+        var y2 = ChiSquared.random(df);
+        return y1 / Math.sqrt(y2 / df);
+      } else {
+        var _y = void 0,
+            _y2 = void 0,
+            z = void 0;
+        do {
+          _y = Normal.random(0, 1);
+          _y2 = Exponential.random(1 / (df / 2 - 1));
+          z = _y * _y2 / (df - 2);
+        } while (1 - z < 0 || Math.exp(-_y2 - z) > 1 - z);
+        return _y / Math.sqrt((1 - 2 / df) * (1 - z));
       }
     }
   }, {
+    key: 'pdf',
+
+
+    /**
+     * Calculate the probability of exaclty x in StudentsT(df).
+     * @param {number} t - The value to predict.
+     * @param {number} df - The degrees of freedom.
+     * @return {number} The probability of x happening in StudentsT(df).
+     */
+    value: function pdf(t, df) {
+      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+      if (typeof t != 'number') throw TypeError('t must be a number.');
+      var lg1 = lngamma(df / 2);
+      var lg2 = lngamma((df + 1) / 2);
+      return Math.exp(lg2 - lg1) / Math.sqrt(Math.PI * df) * Math.pow(1 + t * t / df, -(df + 1) / 2);
+    }
+  }, {
     key: 'cdf',
+
+
+    /**
+     * Calculate the probability of getting x or less StudentsT(df).
+     * @param {number} t - The value to predict.
+     * @param {number} df - The degrees of freedom.
+     * @return {number} The probability of getting x or less from StudentsT(df).
+     */
     value: function cdf(t, df) {
-      if (df <= 0) return NaN;else {
-        var a = void 0,
-            b = void 0,
-            idf = void 0,
-            im2 = void 0,
-            ioe = void 0,
-            s = void 0,
-            c = void 0,
-            ks = void 0,
-            fk = void 0,
-            k = void 0;
-        var g1 = 1 / Math.PI;
-        idf = df;
-        a = t / Math.sqrt(idf);
-        b = idf / (idf + t * t);
-        im2 = df - 2;
-        ioe = idf % 2;
-        s = 1;
-        c = 1;
-        idf = 1;
-        ks = 2 + ioe;
-        fk = ks;
-        if (im2 >= 2) {
-          for (k = ks; k <= im2; k += 2) {
-            c = c * b * (fk - 1) / fk;
-            s += c;
-            if (s != idf) {
-              idf = s;
-              fk += 2;
-            }
+      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+      if (typeof t != 'number') throw TypeError('t must be a number.');
+      var a = void 0,
+          b = void 0,
+          idf = void 0,
+          im2 = void 0,
+          ioe = void 0,
+          s = void 0,
+          c = void 0,
+          ks = void 0,
+          fk = void 0,
+          k = void 0;
+      var g1 = 1 / Math.PI;
+      idf = df;
+      a = t / Math.sqrt(idf);
+      b = idf / (idf + t * t);
+      im2 = df - 2;
+      ioe = idf % 2;
+      s = 1;
+      c = 1;
+      idf = 1;
+      ks = 2 + ioe;
+      fk = ks;
+      if (im2 >= 2) {
+        for (k = ks; k <= im2; k += 2) {
+          c = c * b * (fk - 1) / fk;
+          s += c;
+          if (s != idf) {
+            idf = s;
+            fk += 2;
           }
         }
-        if (ioe != 1) return .5 + .5 * a * Math.sqrt(b) * s;else {
-          if (df == 1) s = 0;
-          return .5 + (a * b * s + Math.atan(a)) * g1;
-        };
+      }
+      if (ioe != 1) return .5 + .5 * a * Math.sqrt(b) * s;else {
+        if (df == 1) s = 0;
+        return .5 + (a * b * s + Math.atan(a)) * g1;
       };
+    }
+  }, {
+    key: 'sample',
+
+
+    /**
+     * Generate an array of k random values from StudentsT(df).
+     * @param {number} k - The number of values to generate.
+     * @param {number} df - The degrees of freedom.
+     * @return {Array<number>} An array of random values from StudentsT(df).
+     */
+    value: function sample(k, df) {
+      var _this2 = this;
+
+      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+      return Array.apply(null, Array(k)).map(function () {
+        return _this2.random(df);
+      });
     }
   }]);
 
-  function StudentsTDistribution(df) {
-    babelHelpers.classCallCheck(this, StudentsTDistribution);
 
-    if (df >= 0) throw RangeError('df must be greater than zero.');
+  /**
+   * Generate a new StudentsT object.
+   * @param {number} df - The degrees of freedom.
+   */
 
-    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(StudentsTDistribution).call(this));
+  function StudentsT(df) {
+    babelHelpers.classCallCheck(this, StudentsT);
+
+    if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+
+    var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(StudentsT).call(this));
 
     _this.pdf = function (t) {
       return _this.constructor.pdf(t, _this.df);
@@ -1454,19 +1768,54 @@ var StudentsTDistribution = function (_Distribution) {
     };
 
     _this.sample = function (n) {
-      return Array.apply(null, Array(n)).map(function () {
-        return _this.random();
-      });
+      return _this.constructor.sample(n, _this.df);
     };
 
     _this.df = df;
+    _this.mean = 0;
+    _this.variance = df > 2 ? df / (df - 2) : Infinity;
     return _this;
   }
 
-  return StudentsTDistribution;
+  /**
+   * Calculate the probability of exaclty x in StudentsT(df).
+   * @memberof StudentsT
+   * @instance
+   * @param {number} t - The value to predict.
+   * @return {number} The probability of x happening in StudentsT(df).
+   */
+
+
+  /**
+   * Calculate the probability of getting x or less from StudentsT(df).
+   * @memberof StudentsT
+   * @instance
+   * @param {number} t - The value to predict.
+   * @return {number} The probability of getting x or less from StudentsT(df).
+   */
+
+
+  /**
+   * Generate a random value from StudentsT(df).
+   * @memberof StudentsT
+   * @instance
+   * @return {number} The random value from StudentsT(df).
+   */
+
+
+  /**
+   * Generate an array of k random values from StudentsT(df).
+   * @param {number} k - The number of values to generate.
+   * @memberof StudentsT
+   * @instance
+   * @return {Array<number>} An array of random values from StudentsT(df).
+   */
+
+
+  return StudentsT;
 }(Distribution);
 
-StudentsTDistribution.covariates = 1;
+StudentsT.covariates = 1;
 
 /**
 * The sample class is the base for all of our sample based calculations.
@@ -1739,4 +2088,4 @@ function ttest(sample, other, x) {
   }
 }
 
-export { choose, error, factorial, gamma, lower as gammainc, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, Normal, Binomial, Bernoulli, StudentsTDistribution as StudentsT, Gamma, Sample, ttest };
+export { choose, error, factorial, gamma, lower as gammainc, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, Normal, Binomial, Bernoulli, StudentsT, Gamma, ChiSquared, Exponential, Sample, ttest };

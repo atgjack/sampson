@@ -10,9 +10,10 @@
 - Binomial
 - Normal
 - Gamma
+- Chi-Square
+- Exponential
+- Student's T
 - Cauchy      (Soon)
-- Chi-Square  (Soon)
-- Student's T (Partial - Missing random value generation.)
 
 ### Statistics
 

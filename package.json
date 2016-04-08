@@ -1,6 +1,6 @@
 {
   "name": "atg-prob",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "engine": "node >= 5.8.0",
   "main": "lib.js",
   "jsnext:main": "lib.es6.js",

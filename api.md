@@ -250,111 +250,100 @@ Get the variance.
 
 Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The variance of B(n,p).
 
-# Gamma
+# Exponential
 
-The Gamma Distribution is a continuous probability distribution
-with parameters a = _shape_ and b = _rate_.
-See: [Normal Distribution](https://en.wikipedia.org/wiki/Normal)
+The Exponential Distribution is a continuous probability distribution
+with parameters r = _rate_.
+See: [Exponential Distribution](https://en.wikipedia.org/wiki/Exponential_distribution)
 
 ## cdf
 
-Calculate the probability of getting x or less from Gamma(a, b).
+Calculate the probability of getting x or less from Exponential(mu).
 
 **Parameters**
 
 -   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Gamma(a, b).
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Exponential(mu).
 
 ## constructor
 
-Generate a new Gamma object.
+Generate a new Exponential object.
 
 **Parameters**
 
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
--   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The scale.
 
 Returns **** 
 
 ## pdf
 
-Calculate the probability of exaclty x in Gamma(a, b).
+Calculate the probability of exaclty x in Exponential(mu).
 
 **Parameters**
 
 -   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Gamma(a, b).
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Exponential(mu).
 
 ## random
 
-Generate a random value from Gamma(a, b).
+Generate a random value from Exponential(mu).
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from Gamma(a, b).
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from Exponential(mu).
 
 ## sample
 
-Generate an array of k random values from Gamma(a, b).
+Generate an array of k random values from Exponential(mu).
 
 **Parameters**
 
 -   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
 
-Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Gamma(a, b).
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Exponential(mu).
 
 ## cdf
 
-Calculate the probability of getting x or less Gamma(a, b).
+Calculate the probability of getting x or less Exponential(mu).
 
 **Parameters**
 
 -   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
--   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The scale.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Gamma(a, b).
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Exponential(mu).
 
 ## pdf
 
-Calculate the probability of exaclty x in Gamma(a, b).
+Calculate the probability of exaclty x in Exponential(mu).
 
 **Parameters**
 
 -   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
--   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The scale.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Gamma(a, b).
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Exponential(mu).
 
 ## random
 
-Generate a random value from Gamma(a, b).
+Generate a random value from Exponential(mu).
 
 **Parameters**
 
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
--   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The scale.
 
-Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from  Gamma(a, b).
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from Exponential(mu).
 
 ## sample
 
-Generate an array of k random values from Gamma(a, b).
+Generate an array of k random values from Exponential(mu).
 
 **Parameters**
 
 -   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
--   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
--   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
--   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `mu` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The scale.
 
-Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Gamma(a, b).
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Exponential(mu).
 
 # Normal
 
@@ -455,6 +444,302 @@ Generate an array of k random values from N(mu, sigma).
 -   `sigma` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The standard deviation.
 
 Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from N(mu, sigma).
+
+# ChiSquared
+
+The Chi-Squared Distribution is a continuous probability distribution
+with parameters df = degrees of freedom\*.
+See: [Chi-Squared Distribution](https://en.wikipedia.org/wiki/Chi-squared_distribution)
+
+## cdf
+
+Calculate the probability of getting x or less from ChiSquared(df).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from ChiSquared(df).
+
+## constructor
+
+Generate a new ChiSquared object.
+
+**Parameters**
+
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **** 
+
+## pdf
+
+Calculate the probability of exaclty x in ChiSquared(df).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in ChiSquared(df).
+
+## random
+
+Generate a random value from ChiSquared(df).
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from ChiSquared(df).
+
+## sample
+
+Generate an array of k random values from ChiSquared(df).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from ChiSquared(df).
+
+## cdf
+
+Calculate the probability of getting x or less ChiSquared(df).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from ChiSquared(df).
+
+## pdf
+
+Calculate the probability of exaclty x in ChiSquared(df).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in ChiSquared(df).
+
+## random
+
+Generate a random value from ChiSquared(df).
+
+**Parameters**
+
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from ChiSquared(df).
+
+## sample
+
+Generate an array of k random values from ChiSquared(df).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from ChiSquared(df).
+
+# StudentsT
+
+The Chi-Squared Distribution is a continuous probability distribution
+with parameters df = degrees of freedom\*.
+See: [Student's t-Distribution](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
+
+## cdf
+
+Calculate the probability of getting x or less from StudentsT(df).
+
+**Parameters**
+
+-   `t` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from StudentsT(df).
+
+## constructor
+
+Generate a new StudentsT object.
+
+**Parameters**
+
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **** 
+
+## pdf
+
+Calculate the probability of exaclty x in StudentsT(df).
+
+**Parameters**
+
+-   `t` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in StudentsT(df).
+
+## random
+
+Generate a random value from StudentsT(df).
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from StudentsT(df).
+
+## sample
+
+Generate an array of k random values from StudentsT(df).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from StudentsT(df).
+
+## cdf
+
+Calculate the probability of getting x or less StudentsT(df).
+
+**Parameters**
+
+-   `t` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from StudentsT(df).
+
+## pdf
+
+Calculate the probability of exaclty x in StudentsT(df).
+
+**Parameters**
+
+-   `t` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in StudentsT(df).
+
+## random
+
+Generate a random value from StudentsT(df).
+
+**Parameters**
+
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from StudentsT(df).
+
+## sample
+
+Generate an array of k random values from StudentsT(df).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+-   `df` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The degrees of freedom.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from StudentsT(df).
+
+# Gamma
+
+The Gamma Distribution is a continuous probability distribution
+with parameters a = _shape_ and b = _rate_.
+See: [Gamma Distribution](https://en.wikipedia.org/wiki/Gamma_distribution)
+
+## cdf
+
+Calculate the probability of getting x or less from Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Gamma(a, b).
+
+## constructor
+
+Generate a new Gamma object.
+
+**Parameters**
+
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **** 
+
+## pdf
+
+Calculate the probability of exaclty x in Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Gamma(a, b).
+
+## random
+
+Generate a random value from Gamma(a, b).
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from Gamma(a, b).
+
+## sample
+
+Generate an array of k random values from Gamma(a, b).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Gamma(a, b).
+
+## cdf
+
+Calculate the probability of getting x or less Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of getting x or less from Gamma(a, b).
+
+## pdf
+
+Calculate the probability of exaclty x in Gamma(a, b).
+
+**Parameters**
+
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to predict.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The probability of x happening in Gamma(a, b).
+
+## random
+
+Generate a random value from Gamma(a, b).
+
+**Parameters**
+
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The random value from  Gamma(a, b).
+
+## sample
+
+Generate an array of k random values from Gamma(a, b).
+
+**Parameters**
+
+-   `k` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values to generate.
+-   `x` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The shape.
+-   `a` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** The rate.
+-   `b` **[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array).&lt;[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)>** An array of random values from Gamma(a, b).
 
 # choose
 
