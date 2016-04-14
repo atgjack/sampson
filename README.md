@@ -1,9 +1,9 @@
-# Sampson.js ```v0.2.0```
+# Sampson.js
 
 [![npm](https://img.shields.io/npm/v/sampson.svg?maxAge=2592000)](https://www.npmjs.com/package/sampson)
 [![Codeship](https://img.shields.io/codeship/41642b20-e4c0-0133-31b0-569c79a00c74/master.svg?maxAge=2592000)]()
-[![Codecov branch](https://img.shields.io/codecov/c/github/atgJack/sampson/master.svg?maxAge=2592000)]()
-[![npm](https://img.shields.io/npm/l/sampson.svg?maxAge=2592000)]()
+[![Codecov branch](https://img.shields.io/codecov/c/github/atgJack/sampson/master.svg?maxAge=2592000)](https://codecov.io/github/atgJack/sampson)
+[![npm](https://img.shields.io/npm/l/sampson.svg?maxAge=2592000)](https://github.com/atgJack/sampson/blob/master/LICENSE)
 
 A Statistical Sampling and Distribution Library.
 Named after the [largest horse ever](https://en.wikipedia.org/wiki/Sampson_(horse)),
