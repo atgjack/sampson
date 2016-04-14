@@ -1,7 +1,9 @@
 {
   "name": "sampson",
   "description": "A statistical sampling and distribution library with a whole lot of horse-power.",
+  "author": "Jack Shira <jack@atg.io> (http://www.atg.io)",
   "version": "0.2.0",
+  "liscence": "ISC",
   "engine": "node >= 5.8.0",
   "main": "lib.js",
   "jsnext:main": "lib.es6.js",
