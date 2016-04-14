@@ -11,7 +11,7 @@ A Statistical Sampling and Distribution Library.
 Named after the [largest horse ever](https://en.wikipedia.org/wiki/Sampson_(horse)),
 it goes to show that small chances can lead to big things.
 
-[Documentation can be found here.](https://doc.esdoc.org/github.com/atgJack/sampson/)
+## Documentation can be found [here.](https://doc.esdoc.org/github.com/atgJack/sampson/)
 
 ### **Currently has the following:**
 
