@@ -1,5 +1,6 @@
 {
-  "name": "probably",
+  "name": "sampson",
+  "description": "A statistical sampling and distribution library with a whole lot of horse-power.",
   "version": "0.2.0",
   "engine": "node >= 5.8.0",
   "main": "lib.js",

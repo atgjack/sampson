@@ -1,6 +1,8 @@
-# Probably.js ```v0.2.0```
+# Sampson.js ```v0.2.0```
 
-## A Statistical Distribution Library
+A Statistical Sampling and Distribution Library.
+Named after the [largest horse ever](https://en.wikipedia.org/wiki/Sampson_(horse)),
+it goes to show that small chances can lead to big things.
 
 ### **Currently has the following:**
 
