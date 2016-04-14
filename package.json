@@ -23,6 +23,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-tape-runner": "^2.0.1",
     "blue-tape": "^0.2.0",
+    "codecov": "^1.0.1",
     "esdoc": "^0.4.6",
     "esdoc-es7-plugin": "0.0.3",
     "faucet": "0.0.1",
