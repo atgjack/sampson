@@ -21,6 +21,7 @@
     "babel-tape-runner": "^2.0.1",
     "blue-tape": "^0.2.0",
     "esdoc": "^0.4.6",
+    "esdoc-es7-plugin": "0.0.3",
     "faucet": "0.0.1",
     "istanbul": "^0.4.2",
     "rollup": "^0.25.7",
