@@ -1,13 +1,13 @@
 {
-  "name": "atg-prob",
-  "version": "0.1.5",
+  "name": "probably",
+  "version": "0.2.0",
   "engine": "node >= 5.8.0",
   "main": "lib.js",
   "jsnext:main": "lib.es6.js",
   "scripts": {
     "tape": "BABEL_ENV=test node_modules/.bin/babel-tape-runner test/**/*.test.js",
     "cover": "BABEL_ENV=test node_modules/.bin/istanbul cover babel-tape-runner test/**/*.test.js",
-    "doc": "node_modules/.bin/documentation build -f 'html' -o doc lib/main.js",
+    "doc": "node_modules/.bin/esdoc -c esdoc.json",
     "build": "BABEL_ENV=build node rollup.js",
     "test": "npm run tape | node_modules/.bin/faucet",
     "start": "npm run cover && npm run doc && npm run build"
@@ -20,7 +20,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-tape-runner": "^2.0.1",
     "blue-tape": "^0.2.0",
-    "documentation": "^4.0.0-beta2",
+    "esdoc": "^0.4.6",
     "faucet": "0.0.1",
     "istanbul": "^0.4.2",
     "rollup": "^0.25.7",

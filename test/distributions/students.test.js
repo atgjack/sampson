@@ -1,109 +1,89 @@
-import test from 'blue-tape';
+import { StudentsT, testDistribution, round } from '../distributions';
 
-import { StudentsT } from '../distributions';
+// Test at http://www.danielsoper.com/statcalc/calculator.aspx?id=40 - pdf
+// Test at http://www.danielsoper.com/statcalc/calculator.aspx?id=41 - cdf
 
-// Test at http://www.danielsoper.com/statcalc/calculator.aspx?id=63 - pdf
-// Test at http://www.danielsoper.com/statcalc/calculator.aspx?id=62 - cdf
+const answers = [
+  //testCase #1
+  {
+    params: { df: 10 },
+    //answer
+    answer: {
+      mean: 0,
+      variance: 1.25,
+      stdDev: 1.118033988749895,
+      relStdDev: NaN,
+      skewness: 0,
+      kurtosis: 4,
+      pdf: [
+        { input: 9,   output: 0.0000021 },
+        { input: 2.5, output: 0.0269387 },
+        { input: 4,   output: 0.0020310 },
+      ],
+      cdf: [
+        { input: 9,   output: 0.9999979 },
+        { input: 2.5, output: 0.9842766 },
+        { input: 4,   output: 0.9987408 },
+      ],
+    }
+  },
 
-let round = (x) => Math.round(x * 10000) / 10000;
 
-test('distributions/students', (t) => {
-  t.test('distributions/students/random', (t) => {
-    let random = StudentsT.random;
+  //testCase #2
+  {
+    params: { df: 2 },
+    //answer
+    answer: {
+      mean: 0,
+      variance: Infinity,
+      stdDev: Infinity,
+      relStdDev: NaN,
+      skewness: NaN,
+      kurtosis: NaN,
+      pdf: [
+        { input: 9,   output: 0.0013225 },
+        { input: 2.5, output: 0.0422006 },
+        { input: 4,   output: 0.0130946 },
+      ],
+      cdf: [
+        { input: 9,   output: 0.9939392 },
+        { input: 2.5, output: 0.9351941 },
+        { input: 4,   output: 0.9714045 },
+      ],
+    }
+  },
+]
 
-    t.test('throws on bad params', t => {
-      t.throws( () => random() );
-      t.throws( () => random(0) );
-      t.throws( () => random(-1) );
-      t.throws( () => random('test') );
-      t.end()
-    });
+const validParams = { df: 10 };
 
-    t.test('generates values that average to the expected value', t => {
-      let values = Array.apply(null, Array(10000)).map( (_,i) => i ).map( i => random(4) )
-      let average = values.reduce( (prev, next) => prev + next ) / (10000)
-      t.equal( Math.round(average), 0 );
-      t.end();
-    });
+testDistribution('students-t', StudentsT, validParams, answers, (t) => {
+  // Validate params - df
+  t.throws( () => new StudentsT({ df: 'test' }), 'throws on typeof(p) not number' );
+  t.throws( () => new StudentsT({ df: -.001 }), 'throws on p less than zero' );
 
-    t.test('generates values that average to the expected value when df is two', t => {
-      let values = Array.apply(null, Array(10000)).map( (_,i) => i ).map( i => random(2) )
-      let average = values.reduce( (prev, next) => prev + next ) / (10000)
-      t.equal( Math.round(average), 0 );
-      t.end();
-    });
-  });
+  // Generate 10000 values and make sure they are within a few decimals off df.
+  let values = StudentsT.sample(10000, validParams);
+  let average = values.reduce( (prev, next) => prev + next ) / (10000)
+  t.equal( Math.round(average), 0, 'generates valid random values' );
 
-  t.test('distributions/students/pdf', t => {
-    let pdf = StudentsT.pdf;
+  // Generate 10000 values and make sure they are within a few decimals off df. ( df == 2 )
+  let Dvalues = StudentsT.sample(10000, { df: 2 });
+  let Daverage = Dvalues.reduce( (prev, next) => prev + next ) / (10000)
+  t.equal( Math.round(Daverage), 0, 'generates valid random values' );
 
-    t.test('throws on bad params', t => {
-      t.throws( () => pdf('test', 2) );
-      t.throws( () => pdf(1, 'test') );
-      t.throws( () => pdf(1, -1) );
-      t.throws( () => pdf(1, 0) );
-      t.end();
-    });
+  // Test CDF edgecases
+  t.equal( round(StudentsT.cdf(1,  { df: 3})), 0.8044989, 'strange case when df is three');
+  t.equal( StudentsT.cdf(1,  { df: 1}), 0.75, 'strange case when df is one');
+  t.equal( round(StudentsT.cdf(1,  { df: 6})), 0.8220412, 'strange case when df is even');
 
-    t.test('generates accurate values', t => {
-      t.equals( round(pdf(-1, 4)), 0.2147 );
-      t.equals( round(pdf(1, 1)), 0.1592 );
-      t.equals( round(pdf(4, 2)), 0.0131 );
-      t.equals( round(pdf(4, 4)), 0.0067 );
-      t.equals( round(pdf(1, 6)), 0.2231 );
-      t.end();
-    });
-  });
+  // Test Descriptive edgecases
+  t.ok( isNaN( StudentsT.mean({df: 1}) ), 'mean of df is one is NaN' );
+  t.ok( isNaN( StudentsT.variance({df: .5}) ), 'variance of df less than one is NaN' );
+  t.equal( StudentsT.variance({df: 2}), Infinity, 'variance of df less than or equal to two is Infinity' );
+  t.ok( isNaN( StudentsT.stdDev({df: .5}) ), 'standard deviation of df less than one is NaN' );
+  t.equal( StudentsT.stdDev({df: 2}), Infinity, 'standard deviation of df less than or equal to two is Infinity' );
+  t.ok( isNaN( StudentsT.skewness({df: 2}) ), 'skewness of df less than or equal to two is NaN' );
+  t.ok( isNaN( StudentsT.kurtosis({df: 4}) ), 'kurtosis of df less than or equal to four is NaN' );
 
-  t.test('distributions/students/cdf', t => {
-    let cdf = StudentsT.cdf;
-
-    t.test('throws on bad params', t => {
-      t.throws( () => cdf('test', 2) );
-      t.throws( () => cdf(1, 'test') );
-      t.throws( () => cdf(1, -1) );
-      t.throws( () => pdf(1, 0) );
-      t.end()
-    });
-
-    t.test('generates accurate values', t => {
-      t.equals( round(cdf(-1, 4)), 0.1870 );
-      t.equals( round(cdf(1, 1)), 0.75 );
-      t.equals( round(cdf(-1, 2)), 0.2113 );
-      t.equals( round(cdf(1, 3)), 0.8045 );
-      t.equals( round(cdf(4, 2)), 0.9714 );
-      t.equals( round(cdf(4, 4)), 0.9919 );
-      t.equals( round(cdf(1, 6)), 0.8220 );
-      t.end();
-    });
-  });
-
-  t.test('distributions/students/class', t => {
-    let Distribution = StudentsT;
-
-    t.test('throws on bad params', t => {
-      // Args == undefined
-      t.throws( () => new Distribution() );
-      t.throws( () => new Distribution(-1) );
-      t.throws( () => new Distribution(0) );
-      t.throws( () => new Distribution('test') );
-      t.end();
-    });
-
-    t.test('generates a valid class', t => {
-      let df = 10;
-      let dist = new Distribution(df);
-      t.equal( dist.df, df );
-      t.equal( dist.mean, 0 );
-      t.equal( dist.variance, 10 / 8 );
-      t.ok( dist.random() );
-      t.equal( Math.round(dist.sample(1000).reduce( (p,n) => p+n ) / 1000), dist.mean );
-      t.equal( round(dist.pdf(2)), 0.0611 );
-      t.equal( round(dist.cdf(2)), 0.9633 );
-      // Test Inifinte variance
-      let infDist = new Distribution(1);
-      t.equal( infDist.variance, Infinity );
-      t.end();
-    });
-  });
+  t.end();
 });

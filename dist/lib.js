@@ -35,6 +35,20 @@
     };
   }();
 
+  babelHelpers.extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
   babelHelpers.get = function get(object, property, receiver) {
     if (object === null) object = Function.prototype;
     var desc = Object.getOwnPropertyDescriptor(object, property);
@@ -148,7 +162,7 @@
    * It can handle much larger numbers because it grows much slower compared to the gamma function.
    * It's (n - 1)! and is used by the gamma function for n > 100.
    * [See](https://en.wikipedia.org/wiki/Gamma_function#The_log-gamma_function)
-   * @param {number} n - The number.
+   * @param {number} z - The number.
    * @return {number} An approximation of ln(n-1)! or NaN if n < 0.
    */
   // Code kanged from: [gamma.js](https://github.com/substack/gamma.js/blob/master/index.js)
@@ -194,11 +208,12 @@
   /**
    * The regularized lower incomplete gamma function
    * [See](https://en.wikipedia.org/wiki/Incomplete_gamma_function#Lower_incomplete_Gamma_function)
-   * @param {number} n - The number.
-   * @return {number} An approximation of (n-1)! or Infinity if n is a negative integer.
+   * @param {number} s - The first number.
+   * @param {number} z - The second number.
+   * @return {number} The value from the lower incomplete gamma function.
    */
   // Code kanged from: [samtools](https://github.com/lh3/samtools/blob/master/bcftools/kfunc.c)
-  function lower(s, z) {
+  function gammainc_lower(s, z) {
     var sum = void 0,
         x = void 0,
         k = void 0;
@@ -349,16 +364,16 @@
    * @param {Array<number>} x - The numbers.
    * @return {number} The median or NaN if x is the empty set.
    */
-  function median(list) {
+  function median(x) {
     var result = void 0;
-    if (list.length == 0) result = NaN;else {
-      var even = list.length % 2 == 0;
+    if (x.length == 0) result = NaN;else {
+      var even = x.length % 2 == 0;
       if (even) {
-        result = select(list, list.length / 2);
-        result += select(list, list.length / 2 - 1);
+        result = select(x, x.length / 2);
+        result += select(x, x.length / 2 - 1);
         result /= 2;
       } else {
-        result = select(list, (list.length - 1) / 2);
+        result = select(x, (x.length - 1) / 2);
       };
     };
     return result;
@@ -369,7 +384,8 @@
    * Uses the internal select function.
    * See: [List Ranking](https://en.wikipedia.org/wiki/List_ranking)
    * @param {Array<number>} x - The numbers.
-   * @return {number} The element at the xth percentile or NaN if x is the empty set.
+   * @param {number} p - The percentile.
+   * @return {number} The element at the pth percentile of x or NaN if x is the empty set.
    */
   function percentile(x, p) {
     if (p == undefined || p > 1 || p < 0) throw new Error('p must be between zero and one inclusive.');else if (x == undefined) throw new Error('need a list to provide a percentile.');else if (x.length == 0) return NaN;else {
@@ -493,23 +509,383 @@
     return (x - mu) / std;
   };
 
+  /***
+   * An abstract Distribution class.
+   * All of our Distributions extend this.
+   * It holds the base uniform random number generator.
+   * @interface
+   */
+
   var Distribution = function () {
     babelHelpers.createClass(Distribution, null, [{
-      key: "random",
+      key: 'validate',
+
+
+      /** @private */
+      value: function validate() {
+        throw new Error('You must define a validation function for your distribution.');
+      }
+
+      /** @private */
+
+    }, {
+      key: 'mean',
+      value: function mean() {
+        return undefined;
+      }
+    }, {
+      key: 'variance',
+
+      /** @private */
+      value: function variance() {
+        return undefined;
+      }
+    }, {
+      key: 'stdDev',
+
+      /** @private */
+      value: function stdDev() {
+        return undefined;
+      }
+    }, {
+      key: 'relStdDev',
+
+      /** @private */
+      value: function relStdDev() {
+        return undefined;
+      }
+    }, {
+      key: 'skewness',
+
+      /** @private */
+      value: function skewness() {
+        return undefined;
+      }
+    }, {
+      key: 'kurtosis',
+
+      /** @private */
+      value: function kurtosis() {
+        return undefined;
+      }
+    }, {
+      key: 'pdf',
+
+
+      /** @private */
+      value: function pdf() {
+        return undefined;
+      }
+    }, {
+      key: 'cdf',
+
+      /** @private */
+      value: function cdf() {
+        return undefined;
+      }
+    }, {
+      key: 'random',
+
+
+      /**
+       * Generate a uniform random variable.
+       * @return {number} A uniform random variable.
+       */
       value: function random() {
         return Math.random();
       }
+    }, {
+      key: 'sample',
+
+
+      /**
+       * Generate an array of k random values.
+       * @param {number} k - The number of values to generate.
+       * @param {Object} params - The distribution parameters.
+       * @return {Array<number>} An array of k random values.
+       */
+      value: function sample(k, params) {
+        var _this = this;
+
+        return Array.apply(null, Array(k)).map(function () {
+          return _this.random(params);
+        });
+      }
     }]);
 
-    function Distribution() {
+
+    /**
+     * A generic distribution constructor.
+     * @param {Object} params - The distribution parameters.
+     */
+
+    function Distribution(params) {
       babelHelpers.classCallCheck(this, Distribution);
+
+      var frozenParams = Object.assign({}, params);
+      /**
+       * The valitated distribution parameters.
+       * @type {Object}
+       */
+      this.params = this.constructor.validate(frozenParams);
+      /**
+       * The distribution mean.
+       * @type {number}
+       */
+      this.mean = this.constructor.mean(frozenParams);
+      /**
+       * The distribution standard deviation.
+       * @type {number}
+       */
+      this.stdDev = this.constructor.stdDev(frozenParams);
+      /**
+       * The distribution relative standard deviation.
+       * @type {number}
+       */
+      this.relStdDev = this.constructor.relStdDev(frozenParams);
+      /**
+       * The distribution variance.
+       * @type {number}
+       */
+      this.variance = this.constructor.variance(frozenParams);
+      /**
+       * The distribution skewness.
+       * @type {number}
+       */
+      this.skewness = this.constructor.skewness(frozenParams);
+      /**
+       * The distribution kurtosis.
+       * @type {number}
+       */
+      this.kurtosis = this.constructor.kurtosis(frozenParams);
     }
 
+    babelHelpers.createClass(Distribution, [{
+      key: 'pdf',
+
+
+      /**
+       * Calculate the probability of exaclty x.
+       * @param {number} x - The value to predict.
+       * @return {number} The probability of x occuring.
+       */
+      value: function pdf(x) {
+        return this.constructor.pdf(x, this.params);
+      }
+
+      /**
+       * Calculate the probability of getting x or less.
+       * @param {number} x - The value to predict.
+       * @return {number} The probability of getting x or less.
+       */
+
+    }, {
+      key: 'cdf',
+      value: function cdf(x) {
+        return this.constructor.cdf(x, this.params);
+      }
+
+      /**
+       * Generate a random value.
+       * @return {number} The random value.
+       */
+
+    }, {
+      key: 'random',
+      value: function random() {
+        return this.constructor.random(this.params);
+      }
+
+      /**
+       * Generate an array of n random values.
+       * @param {number} n - The number of values to generate.
+       * @return {Array<number>} An array of n random values.
+       */
+
+    }, {
+      key: 'sample',
+      value: function sample(n) {
+        return this.constructor.sample(n, this.params);
+      }
+    }]);
     return Distribution;
   }();
 
   Distribution.covariates = 0;
   Distribution.discrete = false;
+
+  /**
+  * The Cauchy Distribution is a continuous probability distribution
+  * with parameters a = *location* and b = *scale*.
+  * See: [Cauchy Distribution](https://en.wikipedia.org/wiki/Cauchy_distribution)
+  */
+
+  var Cauchy = function (_Distribution) {
+    babelHelpers.inherits(Cauchy, _Distribution);
+
+    function Cauchy() {
+      babelHelpers.classCallCheck(this, Cauchy);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Cauchy).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(Cauchy, null, [{
+      key: 'validate',
+
+
+      /**
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
+       */
+      value: function validate(params) {
+        if (!params || params.a === undefined || params.b === undefined) {
+          throw new Error('need a parameter object of shape { a: number, b: number }.');
+        };
+        var a = params.a;
+        var b = params.b;
+
+        if (typeof a != 'number') throw Error('a must be a number.');
+        if (typeof b != 'number' || b <= 0) throw RangeError('b must be greater than zero.');
+        return params;
+      }
+
+      /**
+       * Generate a random value from Cauchy(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The random value from Cauchy(a, b).
+       */
+
+    }, {
+      key: 'random',
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var a = _validate.a;
+        var b = _validate.b;
+
+        var u = void 0;
+        while (!u || u == 0.5) {
+          u = babelHelpers.get(Object.getPrototypeOf(Cauchy), 'random', this).call(this);
+        }return a + b * Math.tan(Math.PI * u);
+      }
+    }, {
+      key: 'pdf',
+
+
+      /**
+       * Calculate the probability of exaclty x in Cauchy(a, b).
+       * @param {number} x - The value to predict.
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of x happening in Cauchy(a, b).
+       */
+      value: function pdf(x, params) {
+        if (typeof x != 'number') throw new TypeError('x must be a number');
+
+        var _validate2 = this.validate(params);
+
+        var a = _validate2.a;
+        var b = _validate2.b;
+
+        return b / (Math.pow(x - a, 2) + Math.pow(b, 2)) / Math.PI;
+      }
+    }, {
+      key: 'cdf',
+
+
+      /**
+       * Calculate the probability of getting x or less from Cauchy(a, b).
+       * @param {number} x - The value to predict.
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of getting x or less from Cauchy(a, b).
+       */
+      value: function cdf(x, params) {
+        if (typeof x != 'number') throw new TypeError('x must be a number');
+
+        var _validate3 = this.validate(params);
+
+        var a = _validate3.a;
+        var b = _validate3.b;
+
+        return Math.atan((x - a) / b) / Math.PI + .5;
+      }
+    }, {
+      key: 'mean',
+
+
+      /**
+       * Get the mean of Cauchy(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The mean of Cauchy(a, b).
+       */
+      value: function mean(params) {
+        return NaN;
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+       * Get the variance of Cauchy(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The variance of Cauchy(a, b).
+       */
+      value: function variance(params) {
+        return NaN;
+      }
+    }, {
+      key: 'stdDev',
+
+
+      /**
+       * Get the standard deviation of Cauchy(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The standard deviation of Cauchy(a, b).
+       */
+      value: function stdDev(params) {
+        return NaN;
+      }
+    }, {
+      key: 'relStdDev',
+
+
+      /**
+       * Get the relative standard deviation of Cauchy(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The relative standard deviation of Cauchy(a, b).
+       */
+      value: function relStdDev(params) {
+        return NaN;
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+       * Get the skewness of Cauchy(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The skewness of Cauchy(a, b).
+       */
+      value: function skewness(params) {
+        return NaN;
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of Cauchy(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of Cauchy(a, b).
+       */
+      value: function kurtosis(params) {
+        return NaN;
+      }
+    }]);
+    return Cauchy;
+  }(Distribution);
+
+  Cauchy.covariates = 1;
+  Cauchy.discrete = false;
 
   var last = NaN;
 
@@ -521,18 +897,46 @@
 
   var Normal = function (_Distribution) {
     babelHelpers.inherits(Normal, _Distribution);
+
+    function Normal() {
+      babelHelpers.classCallCheck(this, Normal);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Normal).apply(this, arguments));
+    }
+
     babelHelpers.createClass(Normal, null, [{
-      key: 'random',
+      key: 'validate',
 
 
       /**
-       * Generate a random value from N(mu, sigma).
-       * @param {number} mu - The mean.
-       * @param {number} sigma - The standard deviation.
-       * @return {number} The random value from N(mu, sigma).
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
        */
-      value: function random(mu, sigma) {
+      value: function validate(params) {
+        if (!params || params.mu === undefined || params.sigma == undefined) {
+          throw new Error('need a parameter object of shape { mu: number, simga: number }.');
+        };
+        var mu = params.mu;
+        var sigma = params.sigma;
+
         if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
+        return params;
+      }
+
+      /**
+       * Generate a random value from Normal(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The random value from Normal(mu, sigma).
+       */
+
+    }, {
+      key: 'random',
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var mu = _validate.mu;
+        var sigma = _validate.sigma;
+
         var z = last;
         last = NaN;
         if (!z) {
@@ -544,37 +948,23 @@
         return mu + z * sigma;
       }
     }, {
-      key: 'sample',
-
-
-      /**
-       * Generate an array of k random values from N(mu, sigma).
-       * @param {number} k - The number of values to generate.
-       * @param {number} mu - The mean.
-       * @param {number} sigma - The standard deviation.
-       * @return {Array<number>} An array of random values from N(mu, sigma).
-       */
-      value: function sample(k, mu, sigma) {
-        var _this2 = this;
-
-        return Array.apply(null, Array(k)).map(function () {
-          return _this2.random(mu, sigma);
-        });
-      }
-    }, {
       key: 'pdf',
 
 
       /**
-       * Calculate the probability of exaclty x in N(mu, sigma).
+       * Calculate the probability of exaclty x in Normal(mu, sigma).
        * @param {number} x - The value to predict.
-       * @param {number} mu - The mean.
-       * @param {number} sigma - The standard deviation.
-       * @return {number} The probability of x happening in N(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of x happening in Normal(mu, sigma).
        */
-      value: function pdf(x, mu, sigma) {
+      value: function pdf(x, params) {
         if (typeof x != 'number') throw new Error('x must be a number.');
-        if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
+
+        var _validate2 = this.validate(params);
+
+        var mu = _validate2.mu;
+        var sigma = _validate2.sigma;
+
         var u = x / Math.abs(sigma);
         return 1 / (Math.sqrt(2 * Math.PI) * Math.abs(sigma)) * Math.exp(-1 * Math.pow(x - mu, 2) / (2 * sigma * sigma));
       }
@@ -583,90 +973,114 @@
 
 
       /**
-       * Calculate the probability of getting x or less from N(mu, sigma).
+       * Calculate the probability of getting x or less from Normal(mu, sigma).
        * @param {number} x - The value to predict.
-       * @param {number} mu - The mean.
-       * @param {number} sigma - The standard deviation.
-       * @return {number} The probability of getting x or less from N(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of getting x or less from Normal(mu, sigma).
        */
-      value: function cdf(x, mu, sigma) {
+      value: function cdf(x, params) {
         if (typeof x != 'number') throw new Error('x must be a number.');
-        if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
+
+        var _validate3 = this.validate(params);
+
+        var mu = _validate3.mu;
+        var sigma = _validate3.sigma;
+
         return .5 * (1 + error((x - mu) / (sigma * Math.sqrt(2))));
       }
+    }, {
+      key: 'mean',
+
+
+      /**
+       * Get the mean of Normal(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The mean of Normal(mu, sigma).
+       */
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
+
+        var mu = _validate4.mu;
+        var sigma = _validate4.sigma;
+
+        return mu;
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+       * Get the variance of Normal(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The variance of Normal(mu, sigma).
+       */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var mu = _validate5.mu;
+        var sigma = _validate5.sigma;
+
+        return sigma * sigma;
+      }
+    }, {
+      key: 'stdDev',
+
+
+      /**
+       * Get the standard deviation of Normal(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The standard deviation of Normal(mu, sigma).
+       */
+      value: function stdDev(params) {
+        var _validate6 = this.validate(params);
+
+        var mu = _validate6.mu;
+        var sigma = _validate6.sigma;
+
+        return sigma;
+      }
+    }, {
+      key: 'relStdDev',
+
+
+      /**
+       * Get the relative standard deviation of Normal(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The relative standard deviation of Normal(mu, sigma).
+       */
+      value: function relStdDev(params) {
+        var _validate7 = this.validate(params);
+
+        var mu = _validate7.mu;
+        var sigma = _validate7.sigma;
+
+        return sigma / mu;
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+       * Get the skewness of Normal(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The skewness of Normal(mu, sigma).
+       */
+      value: function skewness(params) {
+        return 0;
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of Normal(mu, sigma).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of Normal(mu, sigma).
+       */
+      value: function kurtosis(params) {
+        return 3;
+      }
     }]);
-
-
-    /**
-     * Generate a new Normal object.
-     * @param {number} mu - The mean.
-     * @param {number} sigma - The standard deviation.
-     */
-
-    function Normal(mu, sigma) {
-      babelHelpers.classCallCheck(this, Normal);
-
-      if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
-
-      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Normal).call(this));
-
-      _this.pdf = function (x) {
-        return _this.constructor.pdf(x, _this.mu, _this.sigma);
-      };
-
-      _this.cdf = function (x) {
-        return _this.constructor.cdf(x, _this.mu, _this.sigma);
-      };
-
-      _this.random = function () {
-        return _this.constructor.random(_this.mu, _this.sigma);
-      };
-
-      _this.sample = function (n) {
-        return _this.constructor.sample(n, _this.mu, _this.sigma);
-      };
-
-      _this.mu = mu;
-      _this.sigma = sigma;
-      _this.variance = sigma * sigma;
-      return _this;
-    }
-
-    /**
-     * Calculate the probability of exaclty x in N(mu, sigma).
-     * @memberof Normal
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of x happening in N(mu, sigma).
-     */
-
-
-    /**
-     * Calculate the probability of getting x or less from N(mu, sigma).
-     * @memberof Normal
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of getting x or less from N(mu, sigma).
-     */
-
-
-    /**
-     * Generate a random value from N(mu, sigma).
-     * @memberof Normal
-     * @instance
-     * @return {number} The random value from N(mu, sigma).
-     */
-
-
-    /**
-     * Generate an array of k random values from N(mu, sigma).
-     * @param {number} k - The number of values to generate.
-     * @memberof Normal
-     * @instance
-     * @return {Array<number>} An array of random values from N(mu, sigma).
-     */
-
-
     return Normal;
   }(Distribution);
 
@@ -677,24 +1091,50 @@
 
   /**
   * The Exponential Distribution is a continuous probability distribution
-  * with parameters r = *rate*.
+  * with parameters mu = *rate*.
   * See: [Exponential Distribution](https://en.wikipedia.org/wiki/Exponential_distribution)
   */
 
   var Exponential = function (_Distribution) {
     babelHelpers.inherits(Exponential, _Distribution);
+
+    function Exponential() {
+      babelHelpers.classCallCheck(this, Exponential);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Exponential).apply(this, arguments));
+    }
+
     babelHelpers.createClass(Exponential, null, [{
-      key: 'random',
+      key: 'validate',
 
 
       /**
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
+       */
+      value: function validate(params) {
+        if (!params || params.mu === undefined) {
+          throw new Error('need a parameter object of shape { mu: number }.');
+        };
+        var mu = params.mu;
+
+        if (typeof mu != 'number' || mu <= 0) throw RangeError('mu must be greater than zero.');
+        return params;
+      }
+
+      /**
        * Generate a random value from Exponential(mu).
-       * @param {number} mu - The scale.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The random value from Exponential(mu).
        */
-      value: function random(mu) {
-        if (typeof mu != 'number' || typeof mu != 'number') throw new Error('Need mu for the exponential distribution.');
-        if (mu <= 0) throw new Error('mu must be greater than zero.');
+
+    }, {
+      key: 'random',
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var mu = _validate.mu;
+
         return -mu * Math.log1p(-babelHelpers.get(Object.getPrototypeOf(Exponential), 'random', this).call(this));
       }
     }, {
@@ -704,14 +1144,15 @@
       /**
        * Calculate the probability of exaclty x in Exponential(mu).
        * @param {number} x - The value to predict.
-       * @param {number} mu - The scale.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of x happening in Exponential(mu).
        */
-      value: function pdf(x, mu) {
-        if (typeof mu != 'number') throw new Error('Need mu for the exponential distribution.');
-        if (typeof x != 'number') throw new Error('x must be a number.');
-        if (mu <= 0) throw new Error('a must be greater than zero.');
-        if (x < 0) {
+      value: function pdf(x, params) {
+        var _validate2 = this.validate(params);
+
+        var mu = _validate2.mu;
+
+        if (typeof x != 'number') throw new Error('x must be a number.');else if (x < 0) {
           return 0;
         } else {
           return Math.exp(-x / mu) / mu;
@@ -724,109 +1165,105 @@
       /**
        * Calculate the probability of getting x or less Exponential(mu).
        * @param {number} x - The value to predict.
-       * @param {number} mu - The scale.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of getting x or less from Exponential(mu).
        */
-      value: function cdf(x, mu) {
-        if (typeof mu != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
-        if (typeof x != 'number') throw new Error('x must be a number.');
-        if (mu <= 0) throw new Error('a must be greater than zero.');
-        if (x <= 0) return 0;else return 1 - Math.exp(-x / mu);
+      value: function cdf(x, params) {
+        var _validate3 = this.validate(params);
+
+        var mu = _validate3.mu;
+
+        if (typeof x != 'number') throw new Error('x must be a number.');else if (x <= 0) return 0;else return 1 - Math.exp(-x / mu);
       }
     }, {
-      key: 'sample',
+      key: 'mean',
 
 
       /**
-       * Generate an array of k random values from Exponential(mu).
-       * @param {number} k - The number of values to generate.
-       * @param {number} mu - The scale.
-       * @return {Array<number>} An array of random values from Exponential(mu).
+       * Get the mean of Exponential(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The mean of Exponential(mu).
        */
-      value: function sample(k, mu) {
-        var _this2 = this;
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
 
-        return Array.apply(null, Array(k)).map(function () {
-          return _this2.random(mu);
-        });
+        var mu = _validate4.mu;
+
+        return mu;
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+       * Get the variance of Exponential(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The variance of Exponential(mu).
+       */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var mu = _validate5.mu;
+
+        return mu * mu;
+      }
+    }, {
+      key: 'stdDev',
+
+
+      /**
+       * Get the standard deviation of Exponential(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The standard deviation of Exponential(mu).
+       */
+      value: function stdDev(params) {
+        var _validate6 = this.validate(params);
+
+        var mu = _validate6.mu;
+
+        return mu;
+      }
+    }, {
+      key: 'relStdDev',
+
+
+      /**
+       * Get the relative standard deviation of Exponential(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The relative standard deviation of Exponential(mu).
+       */
+      value: function relStdDev(params) {
+        return 1;
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+       * Get the skewness of Exponential(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The skewness of Exponential(mu).
+       */
+      value: function skewness(params) {
+        return 2;
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of Exponential(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of Exponential(mu).
+       */
+      value: function kurtosis(params) {
+        return 9;
       }
     }]);
-
-
-    /**
-     * Generate a new Exponential object.
-     * @param {number} mu - The scale.
-     */
-
-    function Exponential(mu) {
-      babelHelpers.classCallCheck(this, Exponential);
-
-      if (typeof mu != 'number') throw new Error('Need mu for the exponential distribution.');
-      if (mu <= 0) throw new Error('mu must be greater than zero.');
-
-      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Exponential).call(this));
-
-      _this.pdf = function (x) {
-        return _this.constructor.pdf(x, _this.mu);
-      };
-
-      _this.cdf = function (x) {
-        return _this.constructor.cdf(x, _this.mu);
-      };
-
-      _this.random = function () {
-        return _this.constructor.random(_this.mu);
-      };
-
-      _this.sample = function (k) {
-        return _this.constructor.sample(k, _this.mu);
-      };
-
-      _this.mu = mu;
-      _this.mean = mu;
-      _this.variance = Math.pow(mu, -1);
-      return _this;
-    }
-
-    /**
-     * Calculate the probability of exaclty x in Exponential(mu).
-     * @memberof Exponential
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of x happening in Exponential(mu).
-     */
-
-
-    /**
-     * Calculate the probability of getting x or less from Exponential(mu).
-     * @memberof Exponential
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of getting x or less from Exponential(mu).
-     */
-
-
-    /**
-     * Generate a random value from Exponential(mu).
-     * @memberof Exponential
-     * @instance
-     * @return {number} The random value from Exponential(mu).
-     */
-
-
-    /**
-     * Generate an array of k random values from Exponential(mu).
-     * @param {number} k - The number of values to generate.
-     * @memberof Exponential
-     * @instance
-     * @return {Array<number>} An array of random values from Exponential(mu).
-     */
-
-
     return Exponential;
   }(Distribution);
 
-  Exponential.covariates = 2;
+  Exponential.covariates = 1;
 
   // Code kanged from: https://github.com/ampl/gsl/blob/master/randist/gamma.c
 
@@ -838,23 +1275,53 @@
 
   var Gamma = function (_Distribution) {
     babelHelpers.inherits(Gamma, _Distribution);
+
+    function Gamma() {
+      babelHelpers.classCallCheck(this, Gamma);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Gamma).apply(this, arguments));
+    }
+
     babelHelpers.createClass(Gamma, null, [{
-      key: 'random',
+      key: 'validate',
 
 
       /**
-       * Generate a random value from Gamma(a, b).
-       * @param {number} a - The shape.
-       * @param {number} a - The rate.
-       * @return {number} The random value from  Gamma(a, b).
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
        */
-      value: function random(a, b) {
-        if (typeof a != 'number' || typeof a != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
+      value: function validate(params) {
+        if (!params || params.a === undefined || params.b === undefined) {
+          throw new Error('need a parameter object of shape { a: number, b: number }.');
+        };
+        var a = params.a;
+        var b = params.b;
+
+        if (typeof a != 'number' || typeof b != 'number') {
+          throw new Error('Need a and b for the gamma distribution.');
+        };
         if (a <= 0) throw new Error('a must be greater than zero.');
         if (b <= 0) throw new Error('b must be greater than zero.');
+        return params;
+      }
+
+      /**
+       * Generate a random value from Gamma(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The random value from  Gamma(a, b).
+       */
+
+    }, {
+      key: 'random',
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var a = _validate.a;
+        var b = _validate.b;
+
         if (a < 1) {
           var u = babelHelpers.get(Object.getPrototypeOf(Gamma), 'random', this).call(this);
-          return this.random(1 + a, b) * Math.pow(u, 1 / a);
+          return this.random({ a: 1 + a, b: b }) * Math.pow(u, 1 / a);
         } else {
           var x = void 0,
               v = void 0,
@@ -863,7 +1330,7 @@
           var c = 1 / Math.sqrt(9 * d);
           while (1) {
             do {
-              x = Normal.random(0, 1);
+              x = Normal.random({ mu: 0, sigma: 1 });
               v = 1 + c * x;
             } while (v <= 0);
             v = v * v * v;
@@ -883,16 +1350,16 @@
       /**
        * Calculate the probability of exaclty x in Gamma(a, b).
        * @param {number} x - The value to predict.
-       * @param {number} a - The shape.
-       * @param {number} a - The rate.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of x happening in Gamma(a, b).
        */
-      value: function pdf(x, a, b) {
-        if (typeof a != 'number' || typeof b != 'number') throw new Error('Need a and b for the gamma distribution.');
-        if (typeof x != 'number') throw new Error('x must be a number.');
-        if (a <= 0) throw new Error('a must be greater than zero.');
-        if (b <= 0) throw new Error('b must be greater than zero.');
-        if (x < 0) {
+      value: function pdf(x, params) {
+        var _validate2 = this.validate(params);
+
+        var a = _validate2.a;
+        var b = _validate2.b;
+
+        if (typeof x != 'number') throw new Error('x must be a number.');else if (x < 0) {
           return 0;
         } else if (x == 0) {
           if (a == 1) return b;else return 0;
@@ -909,111 +1376,120 @@
       /**
        * Calculate the probability of getting x or less Gamma(a, b).
        * @param {number} x - The value to predict.
-       * @param {number} a - The shape.
-       * @param {number} a - The rate.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of getting x or less from Gamma(a, b).
        */
-      value: function cdf(x, a, b) {
-        if (typeof a != 'number' || typeof b != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
-        if (typeof x != 'number') throw new Error('x must be a number.');
-        if (a <= 0) throw new Error('a must be greater than zero.');
-        if (b <= 0) throw new Error('b must be greater than zero.');
-        if (x <= 0) return 0;else return lower(a, x * b);
+      value: function cdf(x, params) {
+        var _validate3 = this.validate(params);
+
+        var a = _validate3.a;
+        var b = _validate3.b;
+
+        if (typeof x != 'number') throw new Error('x must be a number.');else if (x <= 0) return 0;else return gammainc_lower(a, x * b);
       }
     }, {
-      key: 'sample',
+      key: 'mean',
 
 
       /**
-       * Generate an array of k random values from Gamma(a, b).
-       * @param {number} k - The number of values to generate.
-       * @param {number} a - The shape.
-       * @param {number} a - The rate.
-       * @return {Array<number>} An array of random values from Gamma(a, b).
-       */
-      value: function sample(x, a, b) {
-        var _this2 = this;
+      * Get the mean of Gamma(a, b).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The mean of Gamma(a, b).
+      */
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
 
-        return Array.apply(null, Array(x)).map(function () {
-          return _this2.random(a, b);
-        });
+        var a = _validate4.a;
+        var b = _validate4.b;
+
+        return a / b;
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+      * Get the variance of Gamma(a, b).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The variance of Gamma(a, b).
+      */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var a = _validate5.a;
+        var b = _validate5.b;
+
+        return a / (b * b);
+      }
+    }, {
+      key: 'stdDev',
+
+
+      /**
+      * Get the standard deviation of Gamma(a, b).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The standard deviation of Gamma(a, b).
+      */
+      value: function stdDev(params) {
+        var _validate6 = this.validate(params);
+
+        var a = _validate6.a;
+        var b = _validate6.b;
+
+        return Math.sqrt(a / (b * b));
+      }
+    }, {
+      key: 'relStdDev',
+
+
+      /**
+      * Get the relative standard deviation of Gamma(a, b).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The relative standard deviation of Gamma(a, b).
+      */
+      value: function relStdDev(params) {
+        var _validate7 = this.validate(params);
+
+        var a = _validate7.a;
+        var b = _validate7.b;
+
+        return 1 / Math.sqrt(a);
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+      * Get the skewness of Gamma(a, b).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The skewness of Gamma(a, b).
+      */
+      value: function skewness(params) {
+        var _validate8 = this.validate(params);
+
+        var a = _validate8.a;
+        var b = _validate8.b;
+
+        return 2 / Math.sqrt(a);
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of Gamma(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of Gamma(a, b).
+       */
+      value: function kurtosis(params) {
+        var _validate9 = this.validate(params);
+
+        var a = _validate9.a;
+        var b = _validate9.b;
+
+        return 6 / a;
       }
     }]);
-
-
-    /**
-     * Generate a new Gamma object.
-     * @param {number} a - The shape.
-     * @param {number} a - The rate.
-     */
-
-    function Gamma(a, b) {
-      babelHelpers.classCallCheck(this, Gamma);
-
-      if (typeof a != 'number' || typeof b != 'number') throw new Error('Need mu and sigma for the gamma distribution.');
-      if (a <= 0) throw new Error('a must be greater than zero.');
-      if (b <= 0) throw new Error('b must be greater than zero.');
-
-      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Gamma).call(this));
-
-      _this.pdf = function (x) {
-        return _this.constructor.pdf(x, _this.a, _this.b);
-      };
-
-      _this.cdf = function (x) {
-        return _this.constructor.cdf(x, _this.a, _this.b);
-      };
-
-      _this.random = function () {
-        return _this.constructor.random(_this.a, _this.b);
-      };
-
-      _this.sample = function (n) {
-        return _this.constructor.sample(n, _this.a, _this.b);
-      };
-
-      _this.a = a;
-      _this.b = b;
-      _this.mu = a / b;
-      _this.variance = a / (b * b);
-      return _this;
-    }
-
-    /**
-     * Calculate the probability of exaclty x in Gamma(a, b).
-     * @memberof Gamma
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of x happening in Gamma(a, b).
-     */
-
-
-    /**
-     * Calculate the probability of getting x or less from Gamma(a, b).
-     * @memberof Gamma
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of getting x or less from Gamma(a, b).
-     */
-
-
-    /**
-     * Generate a random value from Gamma(a, b).
-     * @memberof Gamma
-     * @instance
-     * @return {number} The random value from Gamma(a, b).
-     */
-
-
-    /**
-     * Generate an array of k random values from Gamma(a, b).
-     * @param {number} k - The number of values to generate.
-     * @memberof Gamma
-     * @instance
-     * @return {Array<number>} An array of random values from Gamma(a, b).
-     */
-
-
     return Gamma;
   }(Distribution);
 
@@ -1029,99 +1505,49 @@
 
   var Binomial = function (_Distribution) {
     babelHelpers.inherits(Binomial, _Distribution);
+
+    function Binomial() {
+      babelHelpers.classCallCheck(this, Binomial);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Binomial).apply(this, arguments));
+    }
+
     babelHelpers.createClass(Binomial, null, [{
-      key: 'mean',
+      key: 'validate',
 
 
       /**
-       * Get the mean.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
-       * @return {number} The mean of B(n,p).
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
        */
-      value: function mean(p, n) {
-        return n * p;
+      value: function validate(params) {
+        if (!params || params.n === undefined || params.p === undefined) {
+          throw new Error('need a parameter object of shape { n: number, p: number }.');
+        };
+        var n = params.n;
+        var p = params.p;
+
+        if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between zero and one inclusive.");
+        if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");
+        return params;
       }
-    }, {
-      key: 'variance',
-
-
-      /**
-       * Get the variance.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
-       * @return {number} The variance of B(n,p).
-       */
-      value: function variance(p, n) {
-        return n * p * (1 - p);
-      }
-    }, {
-      key: 'stdDev',
-
-
-      /**
-       * Get the standard deviation.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
-       * @return {number} The standard deviation of B(n,p).
-       */
-      value: function stdDev(p, n) {
-        return Math.sqrt(n * p * (1 - p));
-      }
-    }, {
-      key: 'relativeStdDev',
-
-
-      /**
-       * Get the relative standard deviation.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
-       * @return {number} The relative standard deviation of B(n,p).
-       */
-      value: function relativeStdDev(p, n) {
-        return Math.sqrt((1 - p) / (n * p));
-      }
-    }, {
-      key: 'skewness',
-
-
-      /**
-       * Get the skewness.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
-       * @return {number} The skewness of B(n,p).
-       */
-      value: function skewness(p, n) {
-        return (1 - 2 * p) / Math.sqrt(n * p * (1 - p));
-      }
-    }, {
-      key: 'kurtosis',
-
-
-      /**
-       * Get the kurtosis.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
-       * @return {number} The kurtosis of B(n,p).
-       */
-      value: function kurtosis(p, n) {
-        return 3 - 6 / n + 1 / (n * p * (1 - p));
-      }
-    }, {
-      key: 'random',
-
 
       /**
        * Generate a random value from B(n, p).
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The random value from B(n,p).
        */
-      value: function random(p, n) {
+
+    }, {
+      key: 'random',
+      value: function random(params) {
         var _this2 = this;
 
-        if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
-        if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");
+        var _validate = this.validate(params);
+
+        var n = _validate.n;
+        var p = _validate.p;
+
         if (n == 0) return 0;
 
         var flipped = false;
@@ -1206,36 +1632,22 @@
         return Math.floor(flipped ? n - ix : ix);
       }
     }, {
-      key: 'sample',
-
-
-      /**
-       * Generate an array of k random values from B(n, p).
-       * @param {number} k - The number of values to generate.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
-       * @return {Array<number>} An array of random values from B(n,p).
-       */
-      value: function sample(k, p, n) {
-        var _this3 = this;
-
-        return Array.apply(null, Array(k)).map(function () {
-          return _this3.random(p, n);
-        });
-      }
-    }, {
-      key: 'pmf',
+      key: 'pdf',
 
 
       /**
        * Calculate the probability of exaclty k in B(n, p).
        * @param {number} k - The value to predict.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of k happening in B(n,p).
        */
-      value: function pmf(k, p, n) {
-        if (k < 0 || k > n) return 0;else {
+      value: function pdf(k, params) {
+        var _validate2 = this.validate(params);
+
+        var n = _validate2.n;
+        var p = _validate2.p;
+
+        if (typeof k != 'number') throw new Error("k must be a number.");else if (k < 0 || k > n) return 0;else {
           var P = void 0;
           if (p == 0) {
             P = k == 0 ? 1 : 0;
@@ -1260,96 +1672,124 @@
       /**
        * Calculate the probability of k or less in B(n, p).
        * @param {number} k - The value to predict.
-       * @param {number} p - The probability of success.
-       * @param {number} n - number of trials.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability getting a value of k or less from B(n,p).
        */
-      value: function cdf(k, p, n) {
-        if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");else if (typeof k != 'number') throw new Error("k must be a number.");else if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");else if (k < 0) return 0;else if (n < k) return 1;else return Array.apply(null, Array(Math.floor(k) + 1)).map(function (_, i) {
+      value: function cdf(k, params) {
+        var _validate3 = this.validate(params);
+
+        var n = _validate3.n;
+        var p = _validate3.p;
+
+        if (typeof k != 'number') throw new Error("k must be a number.");else if (k < 0) return 0;else if (n < k) return 1;else return Array.apply(null, Array(Math.floor(k) + 1)).map(function (_, i) {
           return choose(n, i) * Math.pow(p, i) * Math.pow(1 - p, n - i);
         }).reduce(function (prev, next) {
           return prev + next;
         }, 0);
       }
+    }, {
+      key: 'mean',
+
+
+      /**
+      * Get the mean of B(n,p).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The mean of B(n,p).
+      */
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
+
+        var n = _validate4.n;
+        var p = _validate4.p;
+
+        return n * p;
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+      * Get the variance of B(n,p).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The variance of B(n,p).
+      */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var n = _validate5.n;
+        var p = _validate5.p;
+
+        return n * p * (1 - p);
+      }
+    }, {
+      key: 'stdDev',
+
+
+      /**
+      * Get the standard deviation of B(n,p).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The standard deviation of B(n,p).
+      */
+      value: function stdDev(params) {
+        var _validate6 = this.validate(params);
+
+        var n = _validate6.n;
+        var p = _validate6.p;
+
+        return Math.sqrt(n * p * (1 - p));
+      }
+    }, {
+      key: 'relStdDev',
+
+
+      /**
+      * Get the relative standard deviation of B(n,p).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The relative standard deviation of B(n,p).
+      */
+      value: function relStdDev(params) {
+        var _validate7 = this.validate(params);
+
+        var n = _validate7.n;
+        var p = _validate7.p;
+
+        return Math.sqrt((1 - p) / (n * p));
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+      * Get the skewness of B(n,p).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The skewness of B(n,p).
+      */
+      value: function skewness(params) {
+        var _validate8 = this.validate(params);
+
+        var n = _validate8.n;
+        var p = _validate8.p;
+
+        return (1 - 2 * p) / Math.sqrt(n * p * (1 - p));
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+      * Get the kurtosis of B(n,p).
+      * @param {Object} params - The distribution parameters.
+      * @return {number} The kurtosis of B(n,p).
+      */
+      value: function kurtosis(params) {
+        var _validate9 = this.validate(params);
+
+        var n = _validate9.n;
+        var p = _validate9.p;
+
+        return 3 - 6 / n + 1 / (n * p * (1 - p));
+      }
     }]);
-
-
-    /**
-     * Generate a new Binomial object.
-     * @param {number} p - The probability of success.
-     * @param {number} n - number of trials.
-     */
-
-    function Binomial(p, n) {
-      babelHelpers.classCallCheck(this, Binomial);
-
-      if (p == undefined || p > 1 || p < 0) throw new Error("p must be between 0 and 1.");
-      if (n == undefined || n < 0) throw new Error("n must be positive or zero.");
-
-      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Binomial).call(this));
-
-      _this.pdf = function (k) {
-        return _this.constructor.pmf(k, _this.p, _this.n);
-      };
-
-      _this.cdf = function (k) {
-        return _this.constructor.cdf(k, _this.p, _this.n);
-      };
-
-      _this.random = function () {
-        return _this.constructor.random(_this.p, _this.n);
-      };
-
-      _this.sample = function (k) {
-        return _this.constructor.sample(k, _this.p, _this.n);
-      };
-
-      _this.p = p;
-      _this.n = n;
-      _this.mu = _this.constructor.mean(p, n);
-      _this.variance = _this.constructor.variance(p, n);
-      _this.stdDev = _this.constructor.stdDev(p, n);
-      _this.relStdDev = _this.constructor.relativeStdDev(p, n);
-      _this.skewness = _this.constructor.skewness(p, n);
-      _this.kurtosis = _this.constructor.kurtosis(p, n);
-      return _this;
-    }
-
-    /**
-     * Calculate the probability of exaclty k in B(n, p).
-     * @memberof Binomial
-     * @instance
-     * @param {number} k - The value to predict.
-     * @return {number} The probability of k happening in B(n,p).
-     */
-
-
-    /**
-     * Calculate the probability of k or less in B(n, p).
-     * @memberof Binomial
-     * @instance
-     * @param {number} k - The value to predict.
-     * @return {number} The probability getting a value of k or less from B(n,p).
-     */
-
-
-    /**
-     * Generate a random value from B(n, p).
-     * @memberof Binomial
-     * @instance
-     * @return {number} The random value from B(n,p).
-     */
-
-
-    /**
-     * Generate an array of k random values from B(n, p).
-     * @memberof Binomial
-     * @instance
-     * @param {number} k - The number of values to generate.
-     * @return {Array<number>} An array of random values from B(n,p).
-     */
-
-
     return Binomial;
   }(Distribution);
 
@@ -1357,10 +1797,9 @@
   Binomial.discrete = true;
 
   /**
-  * The Binomial Distribution is a discrete probability distribution
-  * with parameters n = *number of trials* and p = *probability of success*.
+  * The Bernoulli Distribution is a discrete probability distribution
+  * with parameter p = *probability of success*.
   * See: [Bernoulli Distribution](https://en.wikipedia.org/wiki/Bernoulli_distribution)
-  * @extends Binomial
   */
 
   var Bernoulli = function (_Binomial) {
@@ -1371,26 +1810,33 @@
 
       /**
        * Generate a random value from B(1, p).
-       * @param {number} p - The probability of success.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The random value from B(1,p).
        */
-      value: function random(p) {
-        if (p == undefined || p < 0 || p > 1) throw new Error('p must be between zero and one inclusive.');
+      value: function random(params) {
+        var _validate = this.validate(babelHelpers.extends({}, params, { n: 1 }));
+
+        var p = _validate.p;
+
         var u = Distribution.random();
         if (u < p) return 1;else return 0;
       }
     }, {
-      key: 'pmf',
+      key: 'pdf',
 
 
       /**
        * Calculate the probability of exaclty k in B(1, p).
        * @param {number} k - The value to predict.
-       * @param {number} p - The probability of success.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of k happening in B(1,p).
        */
-      value: function pmf(k, p) {
-        if (k == 0) return 1 - p;else if (k == 1) return p;else return 0;
+      value: function pdf(k, params) {
+        var _validate2 = this.validate(babelHelpers.extends({}, params, { n: 1 }));
+
+        var p = _validate2.p;
+
+        if (typeof k != 'number') throw new Error("k must be a number.");else if (k == 0) return 1 - p;else if (k == 1) return p;else return 0;
       }
     }, {
       key: 'cdf',
@@ -1399,80 +1845,28 @@
       /**
        * Calculate the probability of k or less in B(1, p).
        * @param {number} k - The value to predict.
-       * @param {number} p - The probability of success.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability getting a value of k or less from B(1,p).
        */
-      value: function cdf(k, p) {
-        if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between zero and one inclusive.");else if (typeof k != 'number') throw new Error("k must be a number.");else if (k == 1) return p;else if (k == 0) return 1 - p;else return NaN;
+      value: function cdf(k, params) {
+        var _validate3 = this.validate(babelHelpers.extends({}, params, { n: 1 }));
+
+        var p = _validate3.p;
+
+        if (typeof k != 'number') throw new Error("k must be a number.");else if (k == 1) return p;else if (k == 0) return 1 - p;else return NaN;
       }
     }]);
 
 
     /**
      * Generate a new Bernoulli object.
-     * @param {number} p - The probability of success.
+     * @param {Object} params - The distribution parameters.
      */
 
-    function Bernoulli(p) {
+    function Bernoulli(params) {
       babelHelpers.classCallCheck(this, Bernoulli);
-
-      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Bernoulli).call(this, p, 1));
-
-      _this.pdf = function (k) {
-        return _this.constructor.pmf(k, _this.p);
-      };
-
-      _this.cdf = function (k) {
-        return _this.constructor.cdf(k, _this.p);
-      };
-
-      _this.random = function () {
-        return _this.constructor.random(_this.p);
-      };
-
-      _this.sample = function (n) {
-        return Array.apply(null, Array(n)).map(function () {
-          return _this.random();
-        });
-      };
-
-      return _this;
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Bernoulli).call(this, babelHelpers.extends({}, params, { n: 1 })));
     }
-
-    /**
-     * Calculate the probability of exaclty k in B(1, p).
-     * @memberof Bernoulli
-     * @instance
-     * @param {number} k - The value to predict.
-     * @return {number} The probability of k happening in B(1,p).
-     */
-
-
-    /**
-    * Calculate the probability of k or less in B(1, p).
-     * @memberof Bernoulli
-     * @instance
-     * @param {number} k - The value to predict.
-     * @return {number} The probability getting a value of k or less from B(1,p).
-     */
-
-
-    /**
-     * Generate a random value from B(1, p).
-     * @memberof Bernoulli
-     * @instance
-     * @return {number} The random value from B(1,p).
-     */
-
-
-    /**
-     * Generate an array of k random values from B(1, p).
-     * @memberof Bernoulli
-     * @instance
-     * @param {number} k - The number of values to generate.
-     * @return {Array<number>} An array of random values from B(1,p).
-     */
-
 
     return Bernoulli;
   }(Binomial);
@@ -1483,23 +1877,51 @@
 
   /**
   * The Chi-Squared Distribution is a continuous probability distribution
-  * with parameters df = degrees of freedom*.
+  * with parameters df = *degrees of freedom*.
   * See: [Chi-Squared Distribution](https://en.wikipedia.org/wiki/Chi-squared_distribution)
   */
 
   var ChiSquared = function (_Distribution) {
     babelHelpers.inherits(ChiSquared, _Distribution);
+
+    function ChiSquared() {
+      babelHelpers.classCallCheck(this, ChiSquared);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ChiSquared).apply(this, arguments));
+    }
+
     babelHelpers.createClass(ChiSquared, null, [{
-      key: 'random',
+      key: 'validate',
 
 
       /**
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
+       */
+      value: function validate(params) {
+        if (!params || params.df === undefined) {
+          throw new Error('need a parameter object of shape { df: number }.');
+        };
+        var df = params.df;
+
+        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+        return params;
+      }
+
+      /**
        * Generate a random value from ChiSquared(df).
-       * @param {number} df - The degrees of freedom.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The random value from ChiSquared(df).
        */
-      value: function random(df) {
-        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');else return 2 * Gamma.random(df / 2, 1);
+
+    }, {
+      key: 'random',
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var df = _validate.df;
+
+        return 2 * Gamma.random({ a: df / 2, b: 1 });
       }
     }, {
       key: 'pdf',
@@ -1508,11 +1930,15 @@
       /**
        * Calculate the probability of exaclty x in ChiSquared(df).
        * @param {number} x - The value to predict.
-       * @param {number} df - The degrees of freedom.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of x happening in ChiSquared(df).
        */
-      value: function pdf(x, df) {
-        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');else if (typeof x != 'number') throw new TypeError('x must be a number');else if (x < 0) return 0;else if (df == 2) return Math.exp(-x / 2) / 2;else {
+      value: function pdf(x, params) {
+        var _validate2 = this.validate(params);
+
+        var df = _validate2.df;
+
+        if (typeof x != 'number') throw new TypeError('x must be a number');else if (x < 0) return 0;else if (df == 2) return Math.exp(-x / 2) / 2;else {
           return Math.exp((df / 2 - 1) * Math.log(x / 2) - x / 2 - lngamma(df / 2)) / 2;
         }
       }
@@ -1521,103 +1947,115 @@
 
 
       /**
-       * Calculate the probability of getting x or less ChiSquared(df).
+       * Calculate the probability of getting x or less from ChiSquared(df).
        * @param {number} x - The value to predict.
-       * @param {number} df - The degrees of freedom.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of getting x or less from ChiSquared(df).
        */
-      value: function cdf(x, df) {
-        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');else if (typeof x != 'number') throw new TypeError('x must be a number');else if (x < 0) return 0;else if (df == 2) return 1 - Math.exp(-x / 2);else return lower(df / 2, x / 2);
+      value: function cdf(x, params) {
+        var _validate3 = this.validate(params);
+
+        var df = _validate3.df;
+
+        if (typeof x != 'number') throw new TypeError('x must be a number');else if (x < 0) return 0;else if (df == 2) return 1 - Math.exp(-x / 2);else return gammainc_lower(df / 2, x / 2);
       }
     }, {
-      key: 'sample',
+      key: 'mean',
 
 
       /**
-       * Generate an array of k random values from ChiSquared(df).
-       * @param {number} k - The number of values to generate.
-       * @param {number} df - The degrees of freedom.
-       * @return {Array<number>} An array of random values from ChiSquared(df).
+       * Get the mean of ChiSquared(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The mean of ChiSquared(df).
        */
-      value: function sample(k, df) {
-        var _this2 = this;
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
 
-        return Array.apply(null, Array(k)).map(function () {
-          return _this2.random(df);
-        });
+        var df = _validate4.df;
+
+        return df;
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+       * Get the variance of ChiSquared(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The variance of ChiSquared(df).
+       */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var df = _validate5.df;
+
+        return 2 * df;
+      }
+    }, {
+      key: 'stdDev',
+
+
+      /**
+       * Get the standard deviation of ChiSquared(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The standard deviation of ChiSquared(df).
+       */
+      value: function stdDev(params) {
+        var _validate6 = this.validate(params);
+
+        var df = _validate6.df;
+
+        return Math.sqrt(2 * df);
+      }
+    }, {
+      key: 'relStdDev',
+
+
+      /**
+       * Get the relative standard deviation of ChiSquared(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The relative standard deviation of ChiSquared(df).
+       */
+      value: function relStdDev(params) {
+        var _validate7 = this.validate(params);
+
+        var df = _validate7.df;
+
+        return Math.sqrt(2 / df);
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+       * Get the skewness of ChiSquared(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The skewness of ChiSquared(df).
+       */
+      value: function skewness(params) {
+        var _validate8 = this.validate(params);
+
+        var df = _validate8.df;
+
+        return Math.pow(2, 1.5) / Math.sqrt(df);
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of ChiSquared(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of ChiSquared(df).
+       */
+      value: function kurtosis(params) {
+        var _validate9 = this.validate(params);
+
+        var df = _validate9.df;
+
+        return 3 + 12 / df;
       }
     }]);
-
-
-    /**
-     * Generate a new ChiSquared object.
-     * @param {number} df - The degrees of freedom.
-     */
-
-    function ChiSquared(df) {
-      babelHelpers.classCallCheck(this, ChiSquared);
-
-      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
-
-      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(ChiSquared).call(this));
-
-      _this.pdf = function (x) {
-        return _this.constructor.pdf(x, _this.df);
-      };
-
-      _this.cdf = function (x) {
-        return _this.constructor.cdf(x, _this.df);
-      };
-
-      _this.random = function () {
-        return _this.constructor.random(_this.df);
-      };
-
-      _this.sample = function (n) {
-        return _this.constructor.sample(n, _this.df);
-      };
-
-      _this.df = df;
-      _this.mu = df;
-      _this.variance = 2 * df;
-      return _this;
-    }
-
-    /**
-     * Calculate the probability of exaclty x in ChiSquared(df).
-     * @memberof ChiSquared
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of x happening in ChiSquared(df).
-     */
-
-
-    /**
-     * Calculate the probability of getting x or less from ChiSquared(df).
-     * @memberof ChiSquared
-     * @instance
-     * @param {number} x - The value to predict.
-     * @return {number} The probability of getting x or less from ChiSquared(df).
-     */
-
-
-    /**
-     * Generate a random value from ChiSquared(df).
-     * @memberof ChiSquared
-     * @instance
-     * @return {number} The random value from ChiSquared(df).
-     */
-
-
-    /**
-     * Generate an array of k random values from ChiSquared(df).
-     * @param {number} k - The number of values to generate.
-     * @memberof ChiSquared
-     * @instance
-     * @return {Array<number>} An array of random values from ChiSquared(df).
-     */
-
-
     return ChiSquared;
   }(Distribution);
 
@@ -1628,35 +2066,62 @@
   // Code kanged from: https://github.com/chbrown/nlp/blob/master/src/main/java/cc/mallet/util/StatFunctions.java - CDF - ln236
 
   /**
-  * The Chi-Squared Distribution is a continuous probability distribution
+  * The Student's t-Distribution is a continuous probability distribution
   * with parameters df = degrees of freedom*.
   * See: [Student's t-Distribution](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
   */
 
   var StudentsT = function (_Distribution) {
     babelHelpers.inherits(StudentsT, _Distribution);
+
+    function StudentsT() {
+      babelHelpers.classCallCheck(this, StudentsT);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(StudentsT).apply(this, arguments));
+    }
+
     babelHelpers.createClass(StudentsT, null, [{
-      key: 'random',
+      key: 'validate',
 
 
       /**
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
+       */
+      value: function validate(params) {
+        if (!params || params.df === undefined) {
+          throw new Error('need a parameter object of shape { df: number }.');
+        };
+        var df = params.df;
+
+        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+        return params;
+      }
+
+      /**
        * Generate a random value from StudentsT(df).
-       * @param {number} df - The degrees of freedom.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The random value from StudentsT(df).
        */
-      value: function random(df) {
-        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+
+    }, {
+      key: 'random',
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var df = _validate.df;
+
         if (df <= 2) {
-          var y1 = Normal.random(0, 1);
-          var y2 = ChiSquared.random(df);
+          var y1 = Normal.random({ mu: 0, sigma: 1 });
+          var y2 = ChiSquared.random({ df: df });
           return y1 / Math.sqrt(y2 / df);
         } else {
           var _y = void 0,
               _y2 = void 0,
               z = void 0;
           do {
-            _y = Normal.random(0, 1);
-            _y2 = Exponential.random(1 / (df / 2 - 1));
+            _y = Normal.random({ mu: 0, sigma: 1 });
+            _y2 = Exponential.random({ mu: 1 / (df / 2 - 1) });
             z = _y * _y2 / (df - 2);
           } while (1 - z < 0 || Math.exp(-_y2 - z) > 1 - z);
           return _y / Math.sqrt((1 - 2 / df) * (1 - z));
@@ -1669,12 +2134,16 @@
       /**
        * Calculate the probability of exaclty x in StudentsT(df).
        * @param {number} t - The value to predict.
-       * @param {number} df - The degrees of freedom.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of x happening in StudentsT(df).
        */
-      value: function pdf(t, df) {
-        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+      value: function pdf(t, params) {
         if (typeof t != 'number') throw TypeError('t must be a number.');
+
+        var _validate2 = this.validate(params);
+
+        var df = _validate2.df;
+
         var lg1 = lngamma(df / 2);
         var lg2 = lngamma((df + 1) / 2);
         return Math.exp(lg2 - lg1) / Math.sqrt(Math.PI * df) * Math.pow(1 + t * t / df, -(df + 1) / 2);
@@ -1686,12 +2155,16 @@
       /**
        * Calculate the probability of getting x or less StudentsT(df).
        * @param {number} t - The value to predict.
-       * @param {number} df - The degrees of freedom.
+       * @param {Object} params - The distribution parameters.
        * @return {number} The probability of getting x or less from StudentsT(df).
        */
-      value: function cdf(t, df) {
-        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
+      value: function cdf(t, params) {
         if (typeof t != 'number') throw TypeError('t must be a number.');
+
+        var _validate3 = this.validate(params);
+
+        var df = _validate3.df;
+
         var a = void 0,
             b = void 0,
             idf = void 0,
@@ -1717,10 +2190,10 @@
           for (k = ks; k <= im2; k += 2) {
             c = c * b * (fk - 1) / fk;
             s += c;
-            if (s != idf) {
-              idf = s;
-              fk += 2;
-            }
+            //        if (s != idf) {
+            idf = s;
+            fk += 2;
+            //        }
           }
         }
         if (ioe != 1) return .5 + .5 * a * Math.sqrt(b) * s;else {
@@ -1729,95 +2202,102 @@
         };
       }
     }, {
-      key: 'sample',
+      key: 'mean',
 
 
       /**
-       * Generate an array of k random values from StudentsT(df).
-       * @param {number} k - The number of values to generate.
-       * @param {number} df - The degrees of freedom.
-       * @return {Array<number>} An array of random values from StudentsT(df).
+       * Get the mean of StudentsT(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The mean of StudentsT(df).
        */
-      value: function sample(k, df) {
-        var _this2 = this;
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
 
-        if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
-        return Array.apply(null, Array(k)).map(function () {
-          return _this2.random(df);
-        });
+        var df = _validate4.df;
+
+        return df <= 1 ? NaN : 0;
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+       * Get the variance of StudentsT(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The variance of StudentsT(df).
+       */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var df = _validate5.df;
+
+        if (df < 1) return NaN;else if (df <= 2) return Infinity;else return df / (df - 2);
+      }
+    }, {
+      key: 'stdDev',
+
+
+      /**
+       * Get the standard deviation of StudentsT(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The standard deviation of StudentsT(df).
+       */
+      value: function stdDev(params) {
+        var _validate6 = this.validate(params);
+
+        var df = _validate6.df;
+
+        if (df < 1) return NaN;else if (df <= 2) return Infinity;else return Math.sqrt(df / (df - 2));
+      }
+    }, {
+      key: 'relStdDev',
+
+
+      /**
+       * Get the relative standard deviation of StudentsT(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The relative standard deviation of StudentsT(df).
+       */
+      value: function relStdDev(params) {
+        var _validate7 = this.validate(params);
+
+        var df = _validate7.df;
+
+        return NaN;
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+       * Get the skewness of StudentsT(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The skewness of StudentsT(df).
+       */
+      value: function skewness(params) {
+        var _validate8 = this.validate(params);
+
+        var df = _validate8.df;
+
+        if (df > 3) return 0;else return NaN;
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of StudentsT(df).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of StudentsT(df).
+       */
+      value: function kurtosis(params) {
+        var _validate9 = this.validate(params);
+
+        var df = _validate9.df;
+
+        if (df <= 4) return NaN;else return 3 * (df - 2) / (df - 4);
       }
     }]);
-
-
-    /**
-     * Generate a new StudentsT object.
-     * @param {number} df - The degrees of freedom.
-     */
-
-    function StudentsT(df) {
-      babelHelpers.classCallCheck(this, StudentsT);
-
-      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
-
-      var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(StudentsT).call(this));
-
-      _this.pdf = function (t) {
-        return _this.constructor.pdf(t, _this.df);
-      };
-
-      _this.cdf = function (t) {
-        return _this.constructor.cdf(t, _this.df);
-      };
-
-      _this.random = function () {
-        return _this.constructor.random(_this.df);
-      };
-
-      _this.sample = function (n) {
-        return _this.constructor.sample(n, _this.df);
-      };
-
-      _this.df = df;
-      _this.mean = 0;
-      _this.variance = df > 2 ? df / (df - 2) : Infinity;
-      return _this;
-    }
-
-    /**
-     * Calculate the probability of exaclty x in StudentsT(df).
-     * @memberof StudentsT
-     * @instance
-     * @param {number} t - The value to predict.
-     * @return {number} The probability of x happening in StudentsT(df).
-     */
-
-
-    /**
-     * Calculate the probability of getting x or less from StudentsT(df).
-     * @memberof StudentsT
-     * @instance
-     * @param {number} t - The value to predict.
-     * @return {number} The probability of getting x or less from StudentsT(df).
-     */
-
-
-    /**
-     * Generate a random value from StudentsT(df).
-     * @memberof StudentsT
-     * @instance
-     * @return {number} The random value from StudentsT(df).
-     */
-
-
-    /**
-     * Generate an array of k random values from StudentsT(df).
-     * @param {number} k - The number of values to generate.
-     * @memberof StudentsT
-     * @instance
-     * @return {Array<number>} An array of random values from StudentsT(df).
-     */
-
-
     return StudentsT;
   }(Distribution);
 
@@ -2037,36 +2517,82 @@
       };
 
       if (x.length == 0) throw new Error('Sample of size 0 not allowed.');
+      /**
+       * The sample data passed as x.
+       * @type {Array<number>}
+       */
       this.data = x;
+      /**
+       * The length of th sample data.
+       * @type {number}
+       */
       this.size = x.length;
+      /**
+       * The mean of the sample data.
+       * @type {number}
+       */
       this.mean = mean(x);
+      /**
+       * The standard deviation of the sample data.
+       * @type {number}
+       */
       this.std = this.constructor.stdDev(x);
+      /**
+       * The variance of the sample data.
+       * @type {number}
+       */
       this.variance = this.constructor.variance(x);
+      /**
+       * The skewness of the sample data.
+       * @type {number}
+       */
       this.skewness = this.constructor.skewness(x);
+      /**
+       * The kurtosis of the sample data.
+       * @type {number}
+       */
       this.kurtosis = this.constructor.kurtosis(x);
+      /**
+       * The squared mean deviation of the sample data.
+       * @type {number}
+       */
       this.sqrdMeanDev = this.constructor.sqrdMeanDev(x);
+      /**
+       * The absolute mean deviation of the sample data.
+       * @type {number}
+       */
       this.meanDev = this.constructor.meanDev(x);
+      /**
+       * The root mean deviation of the sample data.
+       * @type {number}
+       */
       this.rootMeanSqrd = this.constructor.rootMeanSqrd(x);
+      /**
+       * The standard mean deviation of the sample data.
+       * @type {number}
+       */
       this.stdMeanDev = this.constructor.stdMeanDev(x);
+      /**
+       * The relative standard deviation of the sample data.
+       * @type {number}
+       */
       this.relStdDev = this.constructor.relativeStdDev(x);
+      /**
+       * The 25%, 50%, and 75% quantiles of the sample data.
+       * @type {Array<number>}
+       */
       this.quartiles = this.constructor.quartiles(x);
     }
 
     /**
-     * Get the covariance.
-     * [See](https://en.wikipedia.org/wiki/Covariance).
-     * @memberof Sample
-     * @instance
+     * Get the covariance with another sample.
      * @param {Sample} y - A Sample object.
      * @return {number} The covariance.
      */
 
 
     /**
-     * Get the correlation.
-     * [See](https://en.wikipedia.org/wiki/Correlation_and_dependence).
-     * @memberof Sample
-     * @instance
+     * Get the correlation with another sample.
      * @param {Sample} y - A Sample object.
      * @return {number} The correlation.
      */
@@ -2098,7 +2624,7 @@
   exports.error = error;
   exports.factorial = factorial;
   exports.gamma = gamma;
-  exports.gammainc = lower;
+  exports.gammainc_lower = gammainc_lower;
   exports.lngamma = lngamma;
   exports.median = median;
   exports.mean = mean;
@@ -2120,6 +2646,7 @@
   exports.Gamma = Gamma;
   exports.ChiSquared = ChiSquared;
   exports.Exponential = Exponential;
+  exports.Cauchy = Cauchy;
   exports.Sample = Sample;
   exports.ttest = ttest;
 

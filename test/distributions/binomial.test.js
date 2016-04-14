@@ -1,98 +1,81 @@
-import test from 'blue-tape';
+import { Binomial, testDistribution, round } from '../distributions';
 
-import { Binomial } from '../distributions';
 
 //Test at http://stattrek.com/online-calculator/binomial.aspx
 
-let round = (x) => Math.round(x * 10000) / 10000;
+const answers = [
+  //testCase #1
+  {
+    params: { p: .5, n: 10},
+    //answer
+    answer: {
+      mean: 5,
+      variance: 2.5,
+      stdDev: Math.sqrt(2.5),
+      relStdDev: Math.sqrt(2.5) / 5,
+      skewness: 0,
+      kurtosis: 2.8,
+      pdf: [
+        { input: 0,  output: 0.0009765625 },
+        { input: 1,  output: 0.009765625 },
+        { input: 5,  output: 0.24609375 },
+      ],
+      cdf: [
+        { input: 0,  output: 0.0009765625 },
+        { input: 1,  output: 0.0107421875 },
+        { input: 5,  output: 0.623046875  },
+      ],
+    }
+  },
 
-test('distributions/binomial', (t) => {
-  t.test('can generate a random value', (t) => {
-    let random = Binomial.random;
+  //testCase #2
+]
 
-    // Make sure it throws on missing args.
-    t.throws( () => random() );
-    t.throws( () => random(.5) );
+const validParams = { p: .5, n: 10 };
 
-    // Make sure it throws outside bounds.
-    t.throws( () => random(1.00000001, 5) );
-    t.throws( () => random(-.00000001, 5) );
+testDistribution('binomial', Binomial, validParams, answers, (t) => {
+  // Validate params - p
+  t.throws( () => new Binomial({ p: 'test', n: 10 }), 'throws on typeof(p) not number' );
+  t.throws( () => new Binomial({ p: 1.001, n: 10 }), 'throws on p greater than one' );
+  t.throws( () => new Binomial({ p: -.001, n: 10 }), 'throws on p less than zero' );
 
-    // Make sure that even at p=0, when n=0 the result is always 0.
-    t.equal( random(1, 0), 0 );
+  // Validate params - n
+  t.throws( () => new Binomial({ p: .5, n: 'test' }), 'throws on typeof(n) not number' );
+  t.throws( () => new Binomial({ p: .5, n: -1 }), 'throws on n less than zero' );
 
-    // Generate 10000 values and make sure they are within a few decimals of p * n. ( Small n + p.)
-    let smallValues = Array.apply(null, Array(10000)).map( (_,i) => i ).map( i => random(.25, 10) )
-    let smallAverage = smallValues.reduce( (prev, next) => prev + next ) / (10000 / 10)
-    t.equal( Math.round(smallAverage), 25 );
 
-    // Generate 10000 values and make sure they are within a few decimals of p * n. ( Large n + p.)
-    let largeValues = Array.apply(null, Array(10000)).map( (_,i) => i ).map( i => random(.75, 100 * 10000) )
-    let largeAverage = largeValues.reduce( (prev, next) => prev + next ) / (10000 * 10000)
-    t.equal( Math.round(largeAverage), 75 );
-    t.end();
-  });
+  // Make sure that at m=0, the result is always 0.
+  let tries = Binomial.sample(10000, { ...validParams, n: 0 })
+  let valid = tries.reduce( (p,n) => n == 0 && p, true )
+  t.ok( valid, 'generates valid values at p == 0' );
 
-  t.test('can calculate pmf values', t => {
-    let pdf = Binomial.pmf;
-    t.equals( round(pdf(0, .25, 1000)), 0 );
-    t.equals( pdf(-10, .25, 1000), 0 );
-    t.equals( pdf(1001, .25, 1000), 0 );
-    t.equals( pdf(0, 0, 1000), 1 );
-    t.equals( pdf(100, 0, 1000), 0 );
-    t.equals( pdf(1000, 1, 1000), 1 );
-    t.equals( pdf(999, 1, 1000), 0 );
-    t.equals( pdf(1000, 0, 1000), 0 );
-    t.equals( pdf(1000, .4, 100000), 0 );
-    t.equals( pdf(140, .01, 10000), Infinity );
-    t.equals( round(pdf(250, .25, 1000)), 0.0291 );
-    t.equals( round(pdf(300, 0.6, 500)), 0.0364 );
-    t.end();
-  });
+  // Make sure that at p=0, the result is always 0.
+  let Ptries = Binomial.sample(10000, { ...validParams, p: 0 })
+  let Pvalid = Ptries.reduce( (p,n) => n == 0 && p, true )
+  t.ok( Pvalid, 'generates valid values at p == 0' );
 
-  t.test('distributions/binomial/cdf', t => {
-    let cdf = Binomial.cdf;
+  // Generate 10000 values and make sure they are within a few decimals of p * n. ( Small n + p.)
+  let smallValues = Binomial.sample(10000, { p: .25, n: 10 } )
+  let smallAverage = smallValues.reduce( (prev, next) => prev + next ) / (10000 / 10)
+  t.equal( Math.round(smallAverage), .25 * 10 * 10 );
 
-    t.test('throws on bad params', t => {
-      t.throws( () => cdf(1, 1.5, 1000) );
-      t.throws( () => cdf(1, -.5, 1000) );
-      t.throws( () => cdf(1, 'test', 1000) );
-      t.throws( () => cdf(1, .5, 'test') );
-      t.throws( () => cdf('test', .5, 1000) );
-      t.end()
-    });
+  // Generate 10000 values and make sure they are within a few decimals of p * n. ( Large n + p.)
+  let largeValues = Binomial.sample(10000, { p: .75, n: 100 * 10000 } );
+  let largeAverage = largeValues.reduce( (prev, next) => prev + next ) / (10000 * 10000)
+  t.equal( Math.round(largeAverage), .75 * 100 );
 
-    t.test('generates accurate values', t => {
-      t.equal( cdf(-1, .5, 1000), 0 );
-      t.equal( cdf(1001, .5, 1000), 1 );
-      t.equal( round(cdf(275, .25, 1000)), .9677 );
-      t.equal( round(cdf(531, .50, 1000)), .9769 );
-      t.equal( round(cdf(742, .75, 1000)), .2905 );
-      t.end()
-    });
-  });
+  // Test PDF edgecases
+  t.equal( Binomial.pdf(-1, validParams), 0, 'when k is less than zero the pdf is zero');
+  t.equal( Binomial.pdf(validParams.n + 1, validParams), 0, 'when k is greatern than n the pdf is zero');
+  t.equal( Binomial.pdf(0, { ...validParams, p: 0}), 1, 'when p is zero and k is zero the pdf is one');
+  t.equal( Binomial.pdf(1, { ...validParams, p: 0}), 0, 'when p is zero is the pdf is zero');
+  t.equal( Binomial.pdf(validParams.n, { ...validParams, p: 1}), 1, 'when p is one and k is n the pdf is one');
+  t.equal( Binomial.pdf(1, { ...validParams, p: 1}), 0, 'when p is one and k is not n the pdf is zero');
+  t.equal( Binomial.pdf(140, { n: 10000, p: .01}), Infinity, 'when n and k are very large and apart the pdf is Infinity');
+  t.equal( Binomial.pdf(1000, { n: 10000, p: .5}), 0, 'when n and k are very large and close the pdf is Infinity');
 
-  t.test('validates and generates the class', t => {
-
-    // Make sure it throws on missing args.
-    t.throws( () => new Binomial() )
-    t.throws( () => new Binomial(.5) )
-
-    // Make sure it throws outside bounds.
-    t.throws( () => new Binomial(1.00000001, 5) );
-    t.throws( () => new Binomial(-.00000001, 5) );
-
-    let n = 10;
-    let p = .5;
-    let dist = new Binomial(p, n);
-    t.equal( dist.mu, 5 );
-    t.equal( dist.variance, 2.5 );
-    t.equal( dist.n, n);
-    t.equal( dist.p, p);
-    t.ok( dist.random() <= dist.n );
-    t.equal( Math.round(dist.sample(1000).reduce( (p,n) => p+n ) / 1000), dist.mu );
-    t.equal( round(dist.pdf(2)), 0.0439 );
-    t.equal( round(dist.cdf(2)), 0.0547 );
-    t.end();
-  })
+  // Test CDF edgecases
+  t.equal( Binomial.cdf(-1, validParams), 0, 'when k is less than zero the cdf is zero');
+  t.equal( Binomial.cdf(validParams.n + 1, validParams), 1, 'when k is greatern than n the pdf is one');
+  t.end();
 });

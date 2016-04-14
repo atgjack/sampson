@@ -1,4 +1,6 @@
-# A Statistical Distribution Library
+# Probably.js ```v0.2.0```
+
+## A Statistical Distribution Library
 
 ### **Currently has the following:**
 
@@ -6,12 +8,12 @@
 
 - Bernoulli
 - Binomial
-- Normal
-- Gamma
+- Cauchy
 - Chi-Square
 - Exponential
+- Gamma
+- Normal
 - Student's T
-- Cauchy      (Soon)
 
 ### Statistics
 
@@ -34,14 +36,16 @@
 - Range
 - Select
 - Standard Deviation
-- Stirling Approximation
+- Stirling's Approximation
 - Summation
 - Nth Power Deviation Summation
 - Variance
 - Z-Score
 
-#### Lifted heavily from:
+#### Major references:
 
 - https://github.com/ampl/gsl
-- https://github.com/simple-statistics/simple-statistics
+- https://github.com/jstat/jstat
 - https://pomax.github.io/bezierinfo/
+- https://github.com/simple-statistics/simple-statistics
+- http://www.itl.nist.gov/div898/handbook/eda/section3/eda366.htm
