@@ -4,6 +4,10 @@
   "author": "Jack Shira <jack@atg.io> (http://www.atg.io)",
   "version": "0.2.1",
   "license": "ISC",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/atgJack/sampson.git"
+  },
   "engine": "node >= 5.8.0",
   "main": "lib.js",
   "jsnext:main": "lib.es6.js",
