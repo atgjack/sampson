@@ -13,7 +13,7 @@ rollup.rollup({
   });
   bundle.write({
     format: 'umd',
-    moduleName: 'probably',
+    moduleName: 'sampson',
     dest: 'dist/lib.js'
   });
 }).catch( function(err) { console.log(err) });
@@ -24,7 +24,7 @@ rollup.rollup({
 }).then( function(bundle) {
   bundle.write({
     format: 'umd',
-    moduleName: 'probably',
+    moduleName: 'sampson',
     dest: 'dist/lib.min.js'
   });
 }).catch( function(err) { console.log(err) });

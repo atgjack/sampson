@@ -232,10 +232,12 @@ function sum(x) {
   if (x.length == 0) return 0;
   var errorComp = 0;
   return x.reduce(function (p, n) {
-    var corrected = n - errorComp;
-    var next = p + corrected;
-    errorComp = next - p - corrected;
-    return next;
+    if (!isNaN(n)) {
+      var corrected = n - errorComp;
+      var next = p + corrected;
+      errorComp = next - p - corrected;
+      return next;
+    } else return p;
   }, 0);
 };
 
@@ -246,7 +248,9 @@ function sum(x) {
  * @return {number} The mean or NaN if x is the empty set.
  */
 function mean(x) {
-  return x.length == 0 ? NaN : sum(x) / x.length;
+  return x.length == 0 ? NaN : sum(x) / x.filter(function (d) {
+    return !isNaN(d);
+  }).length;
 };
 
 /**

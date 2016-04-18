@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.probably = global.probably || {})));
+  (factory((global.sampson = global.sampson || {})));
 }(this, function (exports) { 'use strict';
 
   var babelHelpers = {};
@@ -238,10 +238,12 @@
     if (x.length == 0) return 0;
     var errorComp = 0;
     return x.reduce(function (p, n) {
-      var corrected = n - errorComp;
-      var next = p + corrected;
-      errorComp = next - p - corrected;
-      return next;
+      if (!isNaN(n)) {
+        var corrected = n - errorComp;
+        var next = p + corrected;
+        errorComp = next - p - corrected;
+        return next;
+      } else return p;
     }, 0);
   };
 
@@ -252,7 +254,9 @@
    * @return {number} The mean or NaN if x is the empty set.
    */
   function mean(x) {
-    return x.length == 0 ? NaN : sum(x) / x.length;
+    return x.length == 0 ? NaN : sum(x) / x.filter(function (d) {
+      return !isNaN(d);
+    }).length;
   };
 
   /**

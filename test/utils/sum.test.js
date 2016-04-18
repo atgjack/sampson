@@ -31,4 +31,11 @@ test('utils/sum', (t) => {
     t.equal( sum([]), 0 );
     t.end();
   });
+
+  t.test('can handle NaNs in the mix', (t) => {
+    let answer = 15;
+    let data = [1, NaN, 2, 3, NaN, 4, 5];
+    t.equal( sum(data), answer );
+    t.end();
+  });
 });

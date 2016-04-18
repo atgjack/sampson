@@ -21,4 +21,11 @@ test('utils/mean', (t) => {
     t.ok( isNaN(mean([])) );
     t.end();
   });
+
+  t.test('can handle NaNs in the mix', (t) => {
+    let answer = 3;
+    let data = [1, NaN, 2, 3, NaN, 4, 5];
+    t.equal( mean(data), answer );
+    t.end();
+  });
 });
