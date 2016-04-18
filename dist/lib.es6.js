@@ -2468,6 +2468,162 @@ Weibull.covariates = 1;
 Weibull.discrete = false;
 
 /**
+* The Uniform Distribution is a continuous probability distribution
+* with parameters a = *min* and b = *max*.
+* See: [Uniform Distribution](https://en.wikipedia.org/wiki/Uniform_distribution)
+*/
+
+var Uniform = function (_Distribution) {
+  babelHelpers.inherits(Uniform, _Distribution);
+
+  function Uniform() {
+    babelHelpers.classCallCheck(this, Uniform);
+    return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Uniform).apply(this, arguments));
+  }
+
+  babelHelpers.createClass(Uniform, null, [{
+    key: 'validate',
+
+
+    /**
+     * @private
+     * @param {Object} params - The distribution parameters.
+     * @return {Object} The given parameters.
+     */
+    value: function validate(params) {
+      if (!params || params.a === undefined || params.b === undefined) {
+        throw new Error('need a parameter object of shape { a: number, b: number }.');
+      };
+      var a = params.a;
+      var b = params.b;
+
+      if (typeof a != 'number') throw Error('a must be a number.');
+      if (typeof b != 'number' || b <= a) throw RangeError('b must be greater than a.');
+      return params;
+    }
+
+    /**
+     * Generate a random value from Uniform(a, b).
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The random value from Uniform(a, b).
+     */
+
+  }, {
+    key: 'random',
+    value: function random(params) {
+      var _validate = this.validate(params);
+
+      var a = _validate.a;
+      var b = _validate.b;
+
+      return a + babelHelpers.get(Object.getPrototypeOf(Uniform), 'random', this).call(this) * (b - a);
+    }
+  }, {
+    key: 'pdf',
+
+
+    /**
+     * Calculate the probability of exaclty x in Uniform(a, b).
+     * @param {number} x - The value to predict.
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The probability of x happening in Uniform(a, b).
+     */
+    value: function pdf(x, params) {
+      if (typeof x != 'number') throw new TypeError('x must be a number');
+
+      var _validate2 = this.validate(params);
+
+      var a = _validate2.a;
+      var b = _validate2.b;
+
+      if (x < a || x > b) return 0;else return 1 / (b - a);
+    }
+  }, {
+    key: 'cdf',
+
+
+    /**
+     * Calculate the probability of getting x or less from Uniform(a, b).
+     * @param {number} x - The value to predict.
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The probability of getting x or less from Uniform(a, b).
+     */
+    value: function cdf(x, params) {
+      if (typeof x != 'number') throw new TypeError('x must be a number');
+
+      var _validate3 = this.validate(params);
+
+      var a = _validate3.a;
+      var b = _validate3.b;
+
+      if (x < a) return 0;else if (x >= b) return 1;else return (x - a) / (b - a);
+    }
+  }, {
+    key: 'mean',
+
+
+    /**
+     * Get the mean of Uniform(a, b).
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The mean of Uniform(a, b).
+     */
+    value: function mean(params) {
+      var _validate4 = this.validate(params);
+
+      var a = _validate4.a;
+      var b = _validate4.b;
+
+      return (a + b) / 2;
+    }
+  }, {
+    key: 'variance',
+
+
+    /**
+     * Get the variance of Uniform(a, b).
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The variance of Uniform(a, b).
+     */
+    value: function variance(params) {
+      var _validate5 = this.validate(params);
+
+      var a = _validate5.a;
+      var b = _validate5.b;
+
+      return Math.pow(b - a, 2) / 12;
+    }
+  }, {
+    key: 'skewness',
+
+
+    /**
+     * Get the skewness of Uniform(a, b).
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The skewness of Uniform(a, b).
+     */
+    value: function skewness(params) {
+      return 0;
+    }
+  }, {
+    key: 'kurtosis',
+
+
+    /**
+     * Get the kurtosis of Uniform(a, b).
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The kurtosis of Uniform(a, b).
+     */
+    value: function kurtosis(params) {
+      return -6 / 5;
+    }
+  }]);
+  return Uniform;
+}(Distribution);
+
+Uniform.covariates = 1;
+Uniform.discrete = false;
+
+/**
 * The sample class is the base for all of our sample based calculations.
 * These methods can be directly accessed on the class or renerated via
 * a class instance. You'll need a Sample object for the ttest function.
@@ -2784,4 +2940,4 @@ function ttest(sample, other, x) {
   }
 }
 
-export { choose, error, factorial, gamma, gammainc_lower, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, Normal, Binomial, Bernoulli, StudentsT, Gamma, ChiSquared, Exponential, Cauchy, Weibull, Sample, ttest };
+export { choose, error, factorial, gamma, gammainc_lower, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, Normal, Binomial, Bernoulli, StudentsT, Gamma, ChiSquared, Exponential, Cauchy, Weibull, Uniform, Sample, ttest };

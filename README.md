@@ -17,6 +17,7 @@ it goes to show that small chances can lead to big things.
 - Normal
 - Student's T
 - Weibull
+- Uniform
 
 #### Statistics
 
