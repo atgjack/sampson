@@ -57,7 +57,7 @@ const answers = [
   },
 ]
 
-const validParams = { a: 0, b: 100 };
+const validParams = { a: 0, b: 50 };
 
 testDistribution('Uniform', Uniform, validParams, answers, (t) => {
   // Validate params - a
@@ -71,8 +71,8 @@ testDistribution('Uniform', Uniform, validParams, answers, (t) => {
   // Generate 10000 values and make sure they are average within two orders of magnitude of df.
   // This is a hard random variable to test. !! Open to ideas. !!
   let values = Uniform.sample(10000, validParams);
-  let average = values.reduce( (prev, next) => prev + next ) / (10000)
-  t.equal( Math.round(average), Math.round((validParams.b - validParams.a) / 2), 'generates valid random values' );
+  let average = values.reduce( (prev, next) => prev + next ) / (10000 * 100)
+  t.equal( Math.round(average), Math.round((validParams.b - validParams.a) / 2 / 100), 'generates valid random values' );
 
   //Test x < 0 pdf and cdf cases
   t.equal( Uniform.pdf(-1, validParams), 0, 'pdf of x less than zero is zero.');

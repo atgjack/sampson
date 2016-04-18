@@ -537,9 +537,10 @@
       value: function mean(params) {
         return NaN;
       }
-      /** @private */
     }, {
       key: 'variance',
+
+      /** @private */
       value: function variance(params) {
         return NaN;
       }
@@ -1497,6 +1498,171 @@
   }(Distribution);
 
   Gamma.covariates = 2;
+
+  /**
+  * The Pareto Distribution is a continuous probability distribution
+  * with parameters m = *minimum value* and a = *shape*.
+  * See: [Pareto Distribution](https://en.wikipedia.org/wiki/Pareto_distribution)
+  */
+
+  var Pareto = function (_Distribution) {
+    babelHelpers.inherits(Pareto, _Distribution);
+
+    function Pareto() {
+      babelHelpers.classCallCheck(this, Pareto);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Pareto).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(Pareto, null, [{
+      key: 'validate',
+
+
+      /**
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
+       */
+      value: function validate(params) {
+        if (!params || params.m === undefined || params.a == undefined) {
+          throw new Error('need a parameter object of shape { m: number, a: number }.');
+        };
+        var m = params.m;
+        var a = params.a;
+
+        if (typeof m != 'number' || m <= 0) throw RangeError('m must be greater than zero.');
+        if (typeof a != 'number') throw RangeError('a must be a number.');
+        return params;
+      }
+
+      /**
+       * Generate a random value from Pareto(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The random value from Pareto(mu).
+       */
+
+    }, {
+      key: 'random',
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var m = _validate.m;
+        var a = _validate.a;
+
+        return a * Math.pow(babelHelpers.get(Object.getPrototypeOf(Pareto), 'random', this).call(this), -1 / m);
+      }
+    }, {
+      key: 'pdf',
+
+
+      /**
+       * Calculate the probability of exaclty x in Pareto(mu).
+       * @param {number} x - The value to predict.
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of x happening in Pareto(mu).
+       */
+      value: function pdf(x, params) {
+        var _validate2 = this.validate(params);
+
+        var m = _validate2.m;
+        var a = _validate2.a;
+
+        if (typeof x != 'number') throw new Error('x must be a number.');else if (x < m) {
+          return 0;
+        } else {
+          return a * Math.pow(m, a) / Math.pow(x, a + 1);
+        };
+      }
+    }, {
+      key: 'cdf',
+
+
+      /**
+       * Calculate the probability of getting x or less Pareto(mu).
+       * @param {number} x - The value to predict.
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of getting x or less from Pareto(mu).
+       */
+      value: function cdf(x, params) {
+        var _validate3 = this.validate(params);
+
+        var m = _validate3.m;
+        var a = _validate3.a;
+
+        if (typeof x != 'number') throw new Error('x must be a number.');else if (x < m) return 0;else return 1 - Math.pow(m / x, a);
+      }
+    }, {
+      key: 'mean',
+
+
+      /**
+       * Get the mean of Pareto(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The mean of Pareto(mu).
+       */
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
+
+        var m = _validate4.m;
+        var a = _validate4.a;
+
+        if (a <= 1) return Infinity;else return a * m / (a - 1);
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+       * Get the variance of Pareto(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The variance of Pareto(mu).
+       */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var m = _validate5.m;
+        var a = _validate5.a;
+
+        if (a <= 2) return Infinity;else return a * m * m / ((a - 1) * (a - 1) * (a - 2));
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+       * Get the skewness of Pareto(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The skewness of Pareto(mu).
+       */
+      value: function skewness(params) {
+        var _validate6 = this.validate(params);
+
+        var m = _validate6.m;
+        var a = _validate6.a;
+
+        if (a < 3) return NaN;else return 2 * (1 + a) / (a - 3) * Math.sqrt((a - 2) / a);
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of Pareto(mu).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of Pareto(mu).
+       */
+      value: function kurtosis(params) {
+        var _validate7 = this.validate(params);
+
+        var m = _validate7.m;
+        var a = _validate7.a;
+
+        if (a < 4) return NaN;else return 6 * (a * a * a + a * a - 6 * a - 2) / (a * (a - 3) * (a - 4));
+      }
+    }]);
+    return Pareto;
+  }(Distribution);
+
+  Pareto.covariates = 1;
 
   var SMALL_MEAN = 14;
 
@@ -2973,6 +3139,7 @@
   exports.ChiSquared = ChiSquared;
   exports.Exponential = Exponential;
   exports.Cauchy = Cauchy;
+  exports.Pareto = Pareto;
   exports.Weibull = Weibull;
   exports.Uniform = Uniform;
   exports.Sample = Sample;

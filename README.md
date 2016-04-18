@@ -18,6 +18,7 @@ it goes to show that small chances can lead to big things.
 - Student's T
 - Weibull
 - Uniform
+- Pareto
 
 #### Statistics
 
