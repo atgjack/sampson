@@ -16,6 +16,7 @@ it goes to show that small chances can lead to big things.
 - Gamma
 - Normal
 - Student's T
+- Weibull
 
 #### Statistics
 

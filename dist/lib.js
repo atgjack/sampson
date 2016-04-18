@@ -534,43 +534,42 @@
 
     }, {
       key: 'mean',
-      value: function mean() {
-        return undefined;
+      value: function mean(params) {
+        return NaN;
       }
+      /** @private */
     }, {
       key: 'variance',
-
-      /** @private */
-      value: function variance() {
-        return undefined;
+      value: function variance(params) {
+        return NaN;
       }
     }, {
       key: 'stdDev',
 
       /** @private */
-      value: function stdDev() {
-        return undefined;
+      value: function stdDev(params) {
+        return Math.sqrt(this.variance(params));
       }
     }, {
       key: 'relStdDev',
 
       /** @private */
-      value: function relStdDev() {
-        return undefined;
+      value: function relStdDev(params) {
+        return this.stdDev(params) / this.mean(params);
       }
     }, {
       key: 'skewness',
 
       /** @private */
-      value: function skewness() {
-        return undefined;
+      value: function skewness(params) {
+        return NaN;
       }
     }, {
       key: 'kurtosis',
 
       /** @private */
-      value: function kurtosis() {
-        return undefined;
+      value: function kurtosis(params) {
+        return NaN;
       }
     }, {
       key: 'pdf',
@@ -578,14 +577,14 @@
 
       /** @private */
       value: function pdf() {
-        return undefined;
+        return NaN;
       }
     }, {
       key: 'cdf',
 
       /** @private */
       value: function cdf() {
-        return undefined;
+        return NaN;
       }
     }, {
       key: 'random',
@@ -2308,6 +2307,173 @@
   StudentsT.covariates = 1;
 
   /**
+  * The Weibull Distribution is a continuous probability distribution
+  * with parameters a = *scale* and b = *shape*.
+  * See: [Weibull Distribution](https://en.wikipedia.org/wiki/Weibull_distribution)
+  */
+
+  var Weibull = function (_Distribution) {
+    babelHelpers.inherits(Weibull, _Distribution);
+
+    function Weibull() {
+      babelHelpers.classCallCheck(this, Weibull);
+      return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Weibull).apply(this, arguments));
+    }
+
+    babelHelpers.createClass(Weibull, null, [{
+      key: 'validate',
+
+
+      /**
+       * @private
+       * @param {Object} params - The distribution parameters.
+       * @return {Object} The given parameters.
+       */
+      value: function validate(params) {
+        if (!params || params.a === undefined || params.b === undefined) {
+          throw new Error('need a parameter object of shape { a: number, b: number }.');
+        };
+        var a = params.a;
+        var b = params.b;
+
+        if (typeof a != 'number' || a <= 0) throw Error('a must be greater than zero.');
+        if (typeof b != 'number' || b <= 0) throw RangeError('b must be greater than zero.');
+        return params;
+      }
+    }, {
+      key: 'random',
+
+
+      /**
+       * Generate a random value from Weibull(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The random value from Weibull(a, b).
+       */
+      value: function random(params) {
+        var _validate = this.validate(params);
+
+        var a = _validate.a;
+        var b = _validate.b;
+
+        return a * Math.pow(-Math.log(babelHelpers.get(Object.getPrototypeOf(Weibull), 'random', this).call(this)), 1 / b);
+      }
+    }, {
+      key: 'pdf',
+
+
+      /**
+       * Calculate the probability of exaclty x in Weibull(a, b).
+       * @param {number} x - The value to predict.
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of x happening in Weibull(a, b).
+       */
+      value: function pdf(x, params) {
+        if (typeof x != 'number') throw new TypeError('x must be a number');
+
+        var _validate2 = this.validate(params);
+
+        var a = _validate2.a;
+        var b = _validate2.b;
+
+        if (x < 0) return 0;else return b / a * Math.pow(x / a, b - 1) * Math.exp(-Math.pow(x / a, b));
+      }
+    }, {
+      key: 'cdf',
+
+
+      /**
+       * Calculate the probability of getting x or less from Weibull(a, b).
+       * @param {number} x - The value to predict.
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The probability of getting x or less from Weibull(a, b).
+       */
+      value: function cdf(x, params) {
+        if (typeof x != 'number') throw new TypeError('x must be a number');
+
+        var _validate3 = this.validate(params);
+
+        var a = _validate3.a;
+        var b = _validate3.b;
+
+        if (x < 0) return 0;else return 1 - Math.exp(-Math.pow(x / a, b));
+      }
+    }, {
+      key: 'mean',
+
+
+      /**
+       * Get the mean of Weibull(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The mean of Weibull(a, b).
+       */
+      value: function mean(params) {
+        var _validate4 = this.validate(params);
+
+        var a = _validate4.a;
+        var b = _validate4.b;
+
+        return a * gamma(1 + 1 / b);
+      }
+    }, {
+      key: 'variance',
+
+
+      /**
+       * Get the variance of Weibull(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The variance of Weibull(a, b).
+       */
+      value: function variance(params) {
+        var _validate5 = this.validate(params);
+
+        var a = _validate5.a;
+        var b = _validate5.b;
+
+        return a * a * (gamma(1 + 2 / b) - Math.pow(gamma(1 + 1 / b), 2));
+      }
+    }, {
+      key: 'skewness',
+
+
+      /**
+       * Get the skewness of Weibull(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The skewness of Weibull(a, b).
+       */
+      value: function skewness(params) {
+        var a = params.a;
+        var b = params.b;
+
+        var std = this.stdDev(params);
+        var mu = this.mean(params);
+        return (gamma(1 + 3 / b) * Math.pow(a, 3) - 3 * mu * std * std - Math.pow(mu, 3)) / Math.pow(std, 3);
+      }
+    }, {
+      key: 'kurtosis',
+
+
+      /**
+       * Get the kurtosis of Weibull(a, b).
+       * @param {Object} params - The distribution parameters.
+       * @return {number} The kurtosis of Weibull(a, b).
+       */
+      value: function kurtosis(params) {
+        var a = params.a;
+        var b = params.b;
+
+        var std = this.stdDev(params);
+        var mu = this.mean(params);
+        var skew = this.skewness(params);
+        return (gamma(1 + 4 / b) * Math.pow(a, 4) - 4 * skew * Math.pow(std, 3) * mu - 6 * Math.pow(mu, 2) * Math.pow(std, 2) - Math.pow(mu, 4)) / Math.pow(std, 4) - 3;
+      }
+    }]);
+    return Weibull;
+  }(Distribution);
+
+  Weibull.covariates = 1;
+  Weibull.discrete = false;
+
+  /**
   * The sample class is the base for all of our sample based calculations.
   * These methods can be directly accessed on the class or renerated via
   * a class instance. You'll need a Sample object for the ttest function.
@@ -2651,6 +2817,7 @@
   exports.ChiSquared = ChiSquared;
   exports.Exponential = Exponential;
   exports.Cauchy = Cauchy;
+  exports.Weibull = Weibull;
   exports.Sample = Sample;
   exports.ttest = ttest;
 

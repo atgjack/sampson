@@ -4,6 +4,7 @@ import Distribution from '../lib/distributions/distribution'
 export * from '../lib/distributions';
 export { Distribution };
 
+const DIST_OVERRIDE = 'mean variance skewness kurtosis random pdf cdf validate'.split(' ');
 const DIST_PROPS = 'mean variance stdDev relStdDev skewness kurtosis'.split(' ');
 const DIST_METHODS = 'random pdf cdf'.split(' ');
 const DIST_PRIVATE = 'validate'.split(' ');
@@ -17,7 +18,7 @@ export function testDistribution(name, distribution, validParams, answers, edgec
     t.test( '- implements interface', t => {
       t.ok( Distribution.isPrototypeOf(distribution), 'is an prototype of Distribution' );
 
-      DIST_PROPS.concat(DIST_METHODS).concat(DIST_PRIVATE).forEach( prop => {
+      DIST_OVERRIDE.forEach( prop => {
         t.notEqual( Distribution[prop], distribution[prop], `overrides ${prop}` );
       });
 
