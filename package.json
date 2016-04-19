@@ -2,7 +2,7 @@
   "name": "sampson",
   "description": "A statistical sampling and distribution library with a whole lot of horse-power.",
   "author": "Jack Shira <jack@atg.io> (http://www.atg.io)",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "license": "ISC",
   "repository" : {
     "type" : "git",

@@ -1960,6 +1960,182 @@ Binomial.covariates = 2;
 Binomial.discrete = true;
 
 /**
+* The Poisson Distribution is a discrete probability distribution
+* with parameters mu = *expected value*.
+* See: [Poisson Distribution](https://en.wikipedia.org/wiki/Poisson_distribution)
+*/
+
+var Poisson = function (_Distribution) {
+  babelHelpers.inherits(Poisson, _Distribution);
+
+  function Poisson() {
+    babelHelpers.classCallCheck(this, Poisson);
+    return babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Poisson).apply(this, arguments));
+  }
+
+  babelHelpers.createClass(Poisson, null, [{
+    key: 'validate',
+
+
+    /**
+     * @private
+     * @param {Object} params - The distribution parameters.
+     * @return {Object} The given parameters.
+     */
+    value: function validate(params) {
+      if (!params || params.mu === undefined) {
+        throw new Error('need a parameter object of shape { n: number, p: number }.');
+      };
+      var mu = params.mu;
+
+      if (typeof mu != 'number' || mu <= 0) throw new Error("n must be greater than zero");
+      return params;
+    }
+
+    /**
+     * Generate a random value from B(n, p).
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The random value from Poisson(mu).
+     */
+
+  }, {
+    key: 'random',
+    value: function random(params) {
+      var _validate = this.validate(params);
+
+      var mu = _validate.mu;
+
+      var prod = void 0,
+          emu = void 0,
+          k = 0;
+      while (mu > 10) {
+        var m = Math.round(mu * (7 / 8));
+        var x = Gamma.random({ a: m, b: 1 });
+        if (x >= mu) return k + Binomial.random({ p: mu / x, n: m - 1 });else {
+          k += m;
+          mu -= x;
+        };
+      };
+      mu = Math.exp(-mu);
+      do {
+        prod *= babelHelpers.get(Object.getPrototypeOf(Poisson), 'random', this).call(this);
+        k++;
+      } while (prod > emu);
+      return k - 1;
+    }
+  }, {
+    key: 'pdf',
+
+
+    /**
+     * Calculate the probability of exaclty k in B(n, p).
+     * @param {number} k - The value to predict.
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The probability of k happening in Poisson(mu).
+     */
+    value: function pdf(k, params) {
+      var _validate2 = this.validate(params);
+
+      var mu = _validate2.mu;
+
+      if (typeof k !== 'number') throw new Error('k must be a number.');else return Math.exp(Math.log(mu) * k - lngamma(k + 1) - mu);
+    }
+  }, {
+    key: 'cdf',
+
+
+    /**
+     * Calculate the probability of k or less in B(n, p).
+     * @param {number} k - The value to predict.
+     * @param {Object} params - The distribution parameters.
+     * @return {number} The probability getting a value of k or less from Poisson(mu).
+     */
+    value: function cdf(k, params) {
+      var _this2 = this;
+
+      var _validate3 = this.validate(params);
+
+      var mu = _validate3.mu;
+
+      if (typeof k !== 'number') throw new Error('k must be a number.');else if (k < 0) return 0;else {
+        var arr = Array.apply(null, Array(k + 1)).map(function (_, i) {
+          return _this2.pdf(i, params);
+        });
+        return sum(arr);
+      };
+    }
+  }, {
+    key: 'mean',
+
+
+    /**
+    * Get the mean of Poisson(mu).
+    * @param {Object} params - The distribution parameters.
+    * @return {number} The mean of Poisson(mu).
+    */
+    value: function mean(params) {
+      var _validate4 = this.validate(params);
+
+      var mu = _validate4.mu;
+
+      return mu;
+    }
+  }, {
+    key: 'variance',
+
+
+    /**
+    * Get the variance of Poisson(mu).
+    * @param {Object} params - The distribution parameters.
+    * @return {number} The variance of Poisson(mu).
+    */
+    value: function variance(params) {
+      var _validate5 = this.validate(params);
+
+      var mu = _validate5.mu;
+
+      return mu;
+    }
+  }, {
+    key: 'skewness',
+
+
+    /**
+    * Get the skewness of Poisson(mu).
+    * @param {Object} params - The distribution parameters.
+    * @return {number} The skewness of Poisson(mu).
+    */
+    value: function skewness(params) {
+      var _validate6 = this.validate(params);
+
+      var mu = _validate6.mu;
+
+      return Math.pow(mu, -.5);
+    }
+  }, {
+    key: 'kurtosis',
+
+
+    /**
+    * Get the kurtosis of Poisson(mu).
+    * @param {Object} params - The distribution parameters.
+    * @return {number} The kurtosis of Poisson(mu).
+    */
+    value: function kurtosis(params) {
+      var _validate7 = this.validate(params);
+
+      var mu = _validate7.mu;
+
+      return Math.pow(mu, -1);
+    }
+  }]);
+  return Poisson;
+}(Distribution);
+
+Poisson.covariates = 1;
+Poisson.discrete = true;
+
+/**
 * The Bernoulli Distribution is a discrete probability distribution
 * with parameter p = *probability of success*.
 * See: [Bernoulli Distribution](https://en.wikipedia.org/wiki/Bernoulli_distribution)
@@ -3106,4 +3282,4 @@ function ttest(sample, other, x) {
   }
 }
 
-export { choose, error, factorial, gamma, gammainc_lower, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, Normal, Binomial, Bernoulli, StudentsT, Gamma, ChiSquared, Exponential, Cauchy, Pareto, Weibull, Uniform, Sample, ttest };
+export { choose, error, factorial, gamma, gammainc_lower, lngamma, median, mean, mode, percentile, quantile, range, select, std, stirling, sum, sumNthPowerDev, variance, zscore, Normal, Binomial, Bernoulli, StudentsT, Gamma, ChiSquared, Exponential, Cauchy, Pareto, Poisson, Weibull, Uniform, Sample, ttest };

@@ -19,6 +19,7 @@ it goes to show that small chances can lead to big things.
 - Weibull
 - Uniform
 - Pareto
+- Poisson
 
 #### Statistics
 
