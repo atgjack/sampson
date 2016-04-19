@@ -1698,7 +1698,7 @@
 
         if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between zero and one inclusive.");
         if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");
-        return params;
+        return { n: Math.floor(n), p: p };
       }
 
       /**
@@ -1818,13 +1818,14 @@
 
         if (typeof k != 'number') throw new Error("k must be a number.");else if (k < 0 || k > n) return 0;else {
           var P = void 0;
+          var x = Math.floor(k);
           if (p == 0) {
-            P = k == 0 ? 1 : 0;
+            P = x == 0 ? 1 : 0;
           } else if (p == 1) {
-            P = k == n ? 1 : 0;
+            P = x == n ? 1 : 0;
           } else {
-            var Cnk = choose(n, k);
-            var pows = Math.pow(p, k) * Math.pow(1 - p, n - k);
+            var Cnk = choose(n, x);
+            var pows = Math.pow(p, x) * Math.pow(1 - p, n - x);
             if (Cnk == 'Infinity') {
               if (pows == 0) return 0;else return Cnk;
             } else {
@@ -2011,9 +2012,9 @@
 
         var mu = _validate.mu;
 
-        var prod = void 0,
-            emu = void 0,
-            k = 0;
+        var prod = 1;
+        var emu = 0;
+        var k = 0;
         while (mu > 10) {
           var m = Math.round(mu * (7 / 8));
           var x = Gamma.random({ a: m, b: 1 });
@@ -2022,7 +2023,7 @@
             mu -= x;
           };
         };
-        mu = Math.exp(-mu);
+        emu = Math.exp(-mu);
         do {
           prod *= babelHelpers.get(Object.getPrototypeOf(Poisson), 'random', this).call(this);
           k++;
