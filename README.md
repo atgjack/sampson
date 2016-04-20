@@ -1,4 +1,6 @@
 # Sampson.js
+[![CircleCI branch](https://img.shields.io/circleci/project/atgJack/sampson/master.svg?maxAge=2592000)]()
+[![npm](https://img.shields.io/npm/v/sampson.svg?maxAge=2592000)]()
 
 A Statistical Sampling and Distribution Library.
 Named after the [largest horse ever](https://en.wikipedia.org/wiki/Sampson_(horse)),
