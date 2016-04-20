@@ -20,8 +20,8 @@ test('utils/gamma', (t) => {
   });
 
   t.test('can accurately generate a known value greater than one hundred', t => {
-    let data = 101;
-    let answer = 9.332621544394413e+157;
+    let data = 150;
+    let answer = 3.808922637630647e+260;
     t.equal( round(gamma(data)), answer );
     t.end();
   });
