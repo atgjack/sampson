@@ -92,6 +92,44 @@ babelHelpers.possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
+babelHelpers.slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
+
 babelHelpers.toConsumableArray = function (arr) {
   if (Array.isArray(arr)) {
     for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
@@ -520,14 +558,35 @@ var Distribution = function () {
 
 
     /** @private */
-    value: function validate() {
-      throw new Error('You must define a validation function for your distribution.');
+    value: function validate(params) {
+      var _this = this;
+
+      var valid = {};
+      if ((typeof params === 'undefined' ? 'undefined' : babelHelpers.typeof(params)) != 'object') throw new Error('Parameters must be an object.');else {
+        var keys = Object.keys(this.parameters);
+        keys.map(function (key) {
+          return [key, _this.parameters[key]];
+        }).forEach(function (ar) {
+          var _ar = babelHelpers.slicedToArray(ar, 2);
+
+          var name = _ar[0];
+          var val = _ar[1];
+
+          var type = babelHelpers.typeof(params[name]);
+          if (type === undefined) throw new Error(name + ' needed for this distribution.');else if (type !== 'number') throw new Error(name + ' must be a number.');else if (typeof val == 'function') {
+            var result = val(params[name]);
+            if (!result) throw new Error(name + ' is not valid.');
+            valid[name] = params[name];
+          } else valid[name] = params[name];
+        });
+        return valid;
+      };
     }
-
-    /** @private */
-
   }, {
     key: 'mean',
+
+
+    /** @private */
     value: function mean(params) {
       return NaN;
     }
@@ -603,10 +662,10 @@ var Distribution = function () {
      * @return {Array<number>} An array of k random values.
      */
     value: function sample(k, params) {
-      var _this = this;
+      var _this2 = this;
 
       return Array.apply(null, Array(k)).map(function () {
-        return _this.random(params);
+        return _this2.random(params);
       });
     }
   }]);
@@ -620,42 +679,41 @@ var Distribution = function () {
   function Distribution(params) {
     babelHelpers.classCallCheck(this, Distribution);
 
-    var frozenParams = Object.assign({}, params);
     /**
      * The valitated distribution parameters.
      * @type {Object}
      */
-    this.params = this.constructor.validate(frozenParams);
+    this.params = this.constructor.validate(params);
     /**
      * The distribution mean.
      * @type {number}
      */
-    this.mean = this.constructor.mean(frozenParams);
+    this.mean = this.constructor.mean(params);
     /**
      * The distribution standard deviation.
      * @type {number}
      */
-    this.stdDev = this.constructor.stdDev(frozenParams);
+    this.stdDev = this.constructor.stdDev(params);
     /**
      * The distribution relative standard deviation.
      * @type {number}
      */
-    this.relStdDev = this.constructor.relStdDev(frozenParams);
+    this.relStdDev = this.constructor.relStdDev(params);
     /**
      * The distribution variance.
      * @type {number}
      */
-    this.variance = this.constructor.variance(frozenParams);
+    this.variance = this.constructor.variance(params);
     /**
      * The distribution skewness.
      * @type {number}
      */
-    this.skewness = this.constructor.skewness(frozenParams);
+    this.skewness = this.constructor.skewness(params);
     /**
      * The distribution kurtosis.
      * @type {number}
      */
-    this.kurtosis = this.constructor.kurtosis(frozenParams);
+    this.kurtosis = this.constructor.kurtosis(params);
   }
 
   babelHelpers.createClass(Distribution, [{
@@ -711,6 +769,7 @@ var Distribution = function () {
 
 Distribution.covariates = 0;
 Distribution.discrete = false;
+Distribution.params = {};
 
 /**
 * The Cauchy Distribution is a continuous probability distribution
@@ -884,6 +943,14 @@ var Cauchy = function (_Distribution) {
 
 Cauchy.covariates = 1;
 Cauchy.discrete = false;
+Cauchy.parameters = {
+  'a': function a(_a) {
+    return true;
+  },
+  'b': function b(_b) {
+    return _b >= 0;
+  }
+};
 
 var last = NaN;
 
@@ -1084,6 +1151,14 @@ var Normal = function (_Distribution) {
 
 Normal.covariates = 2;
 Normal.discrete = false;
+Normal.parameters = {
+  'mu': function mu(_mu) {
+    return true;
+  },
+  'sigma': function sigma(_sigma) {
+    return _sigma >= 0;
+  }
+};
 
 // Code kanged from: https://github.com/ampl/gsl/blob/master/randist/exponential.c
 
@@ -1262,6 +1337,11 @@ var Exponential = function (_Distribution) {
 }(Distribution);
 
 Exponential.covariates = 1;
+Exponential.parameters = {
+  'mu': function mu(_mu) {
+    return true;
+  }
+};
 
 // Code kanged from: https://github.com/ampl/gsl/blob/master/randist/gamma.c
 
@@ -1492,6 +1572,14 @@ var Gamma = function (_Distribution) {
 }(Distribution);
 
 Gamma.covariates = 2;
+Gamma.parameters = {
+  'a': function a(_a) {
+    return _a >= 0;
+  },
+  'b': function b(_b) {
+    return _b >= 0;
+  }
+};
 
 /**
 * The Pareto Distribution is a continuous probability distribution
@@ -1657,6 +1745,14 @@ var Pareto = function (_Distribution) {
 }(Distribution);
 
 Pareto.covariates = 1;
+Pareto.parameters = {
+  'm': function m(_m) {
+    return _m >= 0;
+  },
+  'a': function a(_a) {
+    return true;
+  }
+};
 
 var SMALL_MEAN = 14;
 
@@ -1675,34 +1771,14 @@ var Binomial = function (_Distribution) {
   }
 
   babelHelpers.createClass(Binomial, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.n === undefined || params.p === undefined) {
-        throw new Error('need a parameter object of shape { n: number, p: number }.');
-      };
-      var n = params.n;
-      var p = params.p;
-
-      if (typeof p != 'number' || p > 1 || p < 0) throw new Error("p must be between zero and one inclusive.");
-      if (typeof n != 'number' || n < 0) throw new Error("n must be positive or zero.");
-      return { n: Math.floor(n), p: p };
-    }
 
     /**
      * Generate a random value from B(n, p).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from B(n,p).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _this2 = this;
 
@@ -1959,6 +2035,14 @@ var Binomial = function (_Distribution) {
 
 Binomial.covariates = 2;
 Binomial.discrete = true;
+Binomial.parameters = {
+  'p': function p(_p) {
+    return _p >= 0 && _p <= 1;
+  },
+  'n': function n(_n) {
+    return _n >= 0;
+  }
+};
 
 /**
 * The Poisson Distribution is a discrete probability distribution
@@ -1985,11 +2069,11 @@ var Poisson = function (_Distribution) {
      */
     value: function validate(params) {
       if (!params || params.mu === undefined) {
-        throw new Error('need a parameter object of shape { n: number, p: number }.');
+        throw new Error('need a parameter object of shape { mu: number }.');
       };
       var mu = params.mu;
 
-      if (typeof mu != 'number' || mu <= 0) throw new Error("n must be greater than zero");
+      if (typeof mu != 'number' || mu <= 0) throw new Error("mu must be greater than zero");
       return params;
     }
 
@@ -2007,7 +2091,7 @@ var Poisson = function (_Distribution) {
       var mu = _validate.mu;
 
       var prod = 1;
-      var emu = 0;
+      var emu = void 0;
       var k = 0;
       while (mu > 10) {
         var m = Math.round(mu * (7 / 8));
@@ -2135,6 +2219,11 @@ var Poisson = function (_Distribution) {
 
 Poisson.covariates = 1;
 Poisson.discrete = true;
+Poisson.parameters = {
+  'mu': function mu(_mu) {
+    return true;
+  }
+};
 
 /**
 * The Bernoulli Distribution is a discrete probability distribution
@@ -2400,6 +2489,11 @@ var ChiSquared = function (_Distribution) {
 }(Distribution);
 
 ChiSquared.covariates = 1;
+ChiSquared.parameters = {
+  'df': function df(_df) {
+    return _df >= 0;
+  }
+};
 
 // Code kanged from: https://github.com/ampl/gsl/blob/master/randist/tdist.c
 // Code kanged from: http://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.stats.t.html
@@ -2642,6 +2736,11 @@ var StudentsT = function (_Distribution) {
 }(Distribution);
 
 StudentsT.covariates = 1;
+StudentsT.parameters = {
+  'df': function df(_df) {
+    return _df >= 0;
+  }
+};
 
 /**
 * The Weibull Distribution is a continuous probability distribution
@@ -2658,26 +2757,6 @@ var Weibull = function (_Distribution) {
   }
 
   babelHelpers.createClass(Weibull, null, [{
-    key: 'validate',
-
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.a === undefined || params.b === undefined) {
-        throw new Error('need a parameter object of shape { a: number, b: number }.');
-      };
-      var a = params.a;
-      var b = params.b;
-
-      if (typeof a != 'number' || a <= 0) throw Error('a must be greater than zero.');
-      if (typeof b != 'number' || b <= 0) throw RangeError('b must be greater than zero.');
-      return params;
-    }
-  }, {
     key: 'random',
 
 
@@ -2809,6 +2888,14 @@ var Weibull = function (_Distribution) {
 
 Weibull.covariates = 1;
 Weibull.discrete = false;
+Weibull.parameters = {
+  'a': function a(_a) {
+    return _a >= 0;
+  },
+  'b': function b(_b) {
+    return _b > 0;
+  }
+};
 
 /**
 * The Uniform Distribution is a continuous probability distribution
@@ -2965,6 +3052,14 @@ var Uniform = function (_Distribution) {
 
 Uniform.covariates = 1;
 Uniform.discrete = false;
+Uniform.parameters = {
+  'a': function a(_a) {
+    return true;
+  },
+  'b': function b(_b, params) {
+    return _b > params.a;
+  }
+};
 
 /**
 * The sample class is the base for all of our sample based calculations.

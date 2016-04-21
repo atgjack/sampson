@@ -4,7 +4,7 @@ import Distribution from '../lib/distributions/distribution'
 export * from '../lib/distributions';
 export { Distribution };
 
-const DIST_OVERRIDE = 'mean variance skewness kurtosis random pdf cdf validate'.split(' ');
+const DIST_OVERRIDE = 'mean variance skewness kurtosis random pdf cdf'.split(' ');
 const DIST_PROPS = 'mean variance stdDev relStdDev skewness kurtosis'.split(' ');
 const DIST_METHODS = 'random pdf cdf'.split(' ');
 const DIST_PRIVATE = 'validate'.split(' ');
@@ -31,7 +31,7 @@ export function testDistribution(name, distribution, validParams, answers, edgec
       let rand;
       t.doesNotThrow( () => rand = distribution.random(validParams), 'can generate a random variable' )
       t.ok( typeof rand  == 'number', 'random variable is a number' );
-      t.notOk( isNaN(rand), 'random variable is not NaN' );
+      t.notOk( isNaN(rand), 'random variable is not NaN');
 
       t.end();
     });
