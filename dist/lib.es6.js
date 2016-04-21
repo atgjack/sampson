@@ -562,7 +562,7 @@ var Distribution = function () {
       var _this = this;
 
       var valid = {};
-      if ((typeof params === 'undefined' ? 'undefined' : babelHelpers.typeof(params)) != 'object') throw new Error('Parameters must be an object.');else {
+      if ((typeof params === 'undefined' ? 'undefined' : babelHelpers.typeof(params)) != 'object') throw new Error('Parameters must be an object.');else if (Object.keys(params).length != this.covariates) throw new Error('Need proper params.');else {
         var keys = Object.keys(this.parameters);
         keys.map(function (key) {
           return [key, _this.parameters[key]];
@@ -573,11 +573,10 @@ var Distribution = function () {
           var val = _ar[1];
 
           var type = babelHelpers.typeof(params[name]);
-          if (type === undefined) throw new Error(name + ' needed for this distribution.');else if (type !== 'number') throw new Error(name + ' must be a number.');else if (typeof val == 'function') {
-            var result = val(params[name]);
-            if (!result) throw new Error(name + ' is not valid.');
-            valid[name] = params[name];
-          } else valid[name] = params[name];
+          if (type !== 'number') throw new Error(name + ' is needed and must be a number.');else if (typeof val == 'function') {
+            var result = val(params[name], params);
+            if (!result) throw new Error(name + ' is not valid.');else valid[name] = params[name];
+          } else if (val) valid[name] = params[name];
         });
         return valid;
       };
@@ -767,9 +766,9 @@ var Distribution = function () {
   return Distribution;
 }();
 
-Distribution.covariates = 0;
+Distribution.covariates = -1;
 Distribution.discrete = false;
-Distribution.params = {};
+Distribution.parameters = {};
 
 /**
 * The Cauchy Distribution is a continuous probability distribution
@@ -786,34 +785,14 @@ var Cauchy = function (_Distribution) {
   }
 
   babelHelpers.createClass(Cauchy, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.a === undefined || params.b === undefined) {
-        throw new Error('need a parameter object of shape { a: number, b: number }.');
-      };
-      var a = params.a;
-      var b = params.b;
-
-      if (typeof a != 'number') throw Error('a must be a number.');
-      if (typeof b != 'number' || b <= 0) throw RangeError('b must be greater than zero.');
-      return params;
-    }
 
     /**
      * Generate a random value from Cauchy(a, b).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from Cauchy(a, b).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -941,14 +920,14 @@ var Cauchy = function (_Distribution) {
   return Cauchy;
 }(Distribution);
 
-Cauchy.covariates = 1;
+Cauchy.covariates = 2;
 Cauchy.discrete = false;
 Cauchy.parameters = {
   'a': function a(_a) {
     return true;
   },
   'b': function b(_b) {
-    return _b >= 0;
+    return _b > 0;
   }
 };
 
@@ -969,33 +948,14 @@ var Normal = function (_Distribution) {
   }
 
   babelHelpers.createClass(Normal, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.mu === undefined || params.sigma == undefined) {
-        throw new Error('need a parameter object of shape { mu: number, simga: number }.');
-      };
-      var mu = params.mu;
-      var sigma = params.sigma;
-
-      if (typeof mu != 'number' || typeof sigma != 'number') throw new Error('Need mu and sigma for the normal distribution.');
-      return params;
-    }
 
     /**
      * Generate a random value from Normal(mu, sigma).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from Normal(mu, sigma).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -1177,32 +1137,14 @@ var Exponential = function (_Distribution) {
   }
 
   babelHelpers.createClass(Exponential, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.mu === undefined) {
-        throw new Error('need a parameter object of shape { mu: number }.');
-      };
-      var mu = params.mu;
-
-      if (typeof mu != 'number' || mu <= 0) throw RangeError('mu must be greater than zero.');
-      return params;
-    }
 
     /**
      * Generate a random value from Exponential(mu).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from Exponential(mu).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -1339,7 +1281,7 @@ var Exponential = function (_Distribution) {
 Exponential.covariates = 1;
 Exponential.parameters = {
   'mu': function mu(_mu) {
-    return true;
+    return _mu > 0;
   }
 };
 
@@ -1360,37 +1302,14 @@ var Gamma = function (_Distribution) {
   }
 
   babelHelpers.createClass(Gamma, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.a === undefined || params.b === undefined) {
-        throw new Error('need a parameter object of shape { a: number, b: number }.');
-      };
-      var a = params.a;
-      var b = params.b;
-
-      if (typeof a != 'number' || typeof b != 'number') {
-        throw new Error('Need a and b for the gamma distribution.');
-      };
-      if (a <= 0) throw new Error('a must be greater than zero.');
-      if (b <= 0) throw new Error('b must be greater than zero.');
-      return params;
-    }
 
     /**
      * Generate a random value from Gamma(a, b).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from  Gamma(a, b).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -1574,10 +1493,10 @@ var Gamma = function (_Distribution) {
 Gamma.covariates = 2;
 Gamma.parameters = {
   'a': function a(_a) {
-    return _a >= 0;
+    return _a > 0;
   },
   'b': function b(_b) {
-    return _b >= 0;
+    return _b > 0;
   }
 };
 
@@ -1596,34 +1515,14 @@ var Pareto = function (_Distribution) {
   }
 
   babelHelpers.createClass(Pareto, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.m === undefined || params.a == undefined) {
-        throw new Error('need a parameter object of shape { m: number, a: number }.');
-      };
-      var m = params.m;
-      var a = params.a;
-
-      if (typeof m != 'number' || m <= 0) throw RangeError('m must be greater than zero.');
-      if (typeof a != 'number') throw RangeError('a must be a number.');
-      return params;
-    }
 
     /**
      * Generate a random value from Pareto(mu).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from Pareto(mu).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -1744,10 +1643,10 @@ var Pareto = function (_Distribution) {
   return Pareto;
 }(Distribution);
 
-Pareto.covariates = 1;
+Pareto.covariates = 2;
 Pareto.parameters = {
   'm': function m(_m) {
-    return _m >= 0;
+    return _m > 0;
   },
   'a': function a(_a) {
     return true;
@@ -2059,32 +1958,14 @@ var Poisson = function (_Distribution) {
   }
 
   babelHelpers.createClass(Poisson, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.mu === undefined) {
-        throw new Error('need a parameter object of shape { mu: number }.');
-      };
-      var mu = params.mu;
-
-      if (typeof mu != 'number' || mu <= 0) throw new Error("mu must be greater than zero");
-      return params;
-    }
 
     /**
      * Generate a random value from B(n, p).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from Poisson(mu).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -2221,7 +2102,7 @@ Poisson.covariates = 1;
 Poisson.discrete = true;
 Poisson.parameters = {
   'mu': function mu(_mu) {
-    return true;
+    return _mu >= 0;
   }
 };
 
@@ -2235,7 +2116,6 @@ var Bernoulli = function (_Binomial) {
   babelHelpers.inherits(Bernoulli, _Binomial);
   babelHelpers.createClass(Bernoulli, null, [{
     key: 'random',
-
 
     /**
      * Generate a random value from B(1, p).
@@ -2300,8 +2180,6 @@ var Bernoulli = function (_Binomial) {
   return Bernoulli;
 }(Binomial);
 
-Bernoulli.covariates = 1;
-
 // Code kanged from: https://github.com/ampl/gsl/blob/master/randist/chisq.c
 
 /**
@@ -2319,32 +2197,14 @@ var ChiSquared = function (_Distribution) {
   }
 
   babelHelpers.createClass(ChiSquared, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.df === undefined) {
-        throw new Error('need a parameter object of shape { df: number }.');
-      };
-      var df = params.df;
-
-      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
-      return params;
-    }
 
     /**
      * Generate a random value from ChiSquared(df).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from ChiSquared(df).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -2514,32 +2374,14 @@ var StudentsT = function (_Distribution) {
   }
 
   babelHelpers.createClass(StudentsT, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.df === undefined) {
-        throw new Error('need a parameter object of shape { df: number }.');
-      };
-      var df = params.df;
-
-      if (typeof df != 'number' || df <= 0) throw RangeError('df must be greater than zero.');
-      return params;
-    }
 
     /**
      * Generate a random value from StudentsT(df).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from StudentsT(df).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -2886,7 +2728,7 @@ var Weibull = function (_Distribution) {
   return Weibull;
 }(Distribution);
 
-Weibull.covariates = 1;
+Weibull.covariates = 2;
 Weibull.discrete = false;
 Weibull.parameters = {
   'a': function a(_a) {
@@ -2912,34 +2754,14 @@ var Uniform = function (_Distribution) {
   }
 
   babelHelpers.createClass(Uniform, null, [{
-    key: 'validate',
+    key: 'random',
 
-
-    /**
-     * @private
-     * @param {Object} params - The distribution parameters.
-     * @return {Object} The given parameters.
-     */
-    value: function validate(params) {
-      if (!params || params.a === undefined || params.b === undefined) {
-        throw new Error('need a parameter object of shape { a: number, b: number }.');
-      };
-      var a = params.a;
-      var b = params.b;
-
-      if (typeof a != 'number') throw Error('a must be a number.');
-      if (typeof b != 'number' || b <= a) throw RangeError('b must be greater than a.');
-      return params;
-    }
 
     /**
      * Generate a random value from Uniform(a, b).
      * @param {Object} params - The distribution parameters.
      * @return {number} The random value from Uniform(a, b).
      */
-
-  }, {
-    key: 'random',
     value: function random(params) {
       var _validate = this.validate(params);
 
@@ -3050,12 +2872,10 @@ var Uniform = function (_Distribution) {
   return Uniform;
 }(Distribution);
 
-Uniform.covariates = 1;
+Uniform.covariates = 2;
 Uniform.discrete = false;
 Uniform.parameters = {
-  'a': function a(_a) {
-    return true;
-  },
+  'a': true,
   'b': function b(_b, params) {
     return _b > params.a;
   }
