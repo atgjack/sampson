@@ -9,7 +9,7 @@
     "url" : "https://github.com/atgJack/sampson.git"
   },
   "engine": "node >= 5.8.0",
-  "main": "lib.js",
+  "main": "dist/lib.js",
   "jsnext:main": "lib.es6.js",
   "scripts": {
     "tape": "BABEL_ENV=test node_modules/.bin/babel-tape-runner test/**/*.test.js",
